@@ -69,6 +69,22 @@ ecommerce-project/
 
 ---
 
+## 📸 Screenshots
+
+### 🏠 User Home / Product Listing
+
+![User Home](screenshots/user-home.png)
+
+### 📦 Product Details
+
+![Product Details](screenshots/product-details.png)
+
+### 🔐 Admin Login
+
+![Admin Login](screenshots/admin-login.png)
+
+---
+
 ## 🚀 Tech Stack
 
 ### Frontend
