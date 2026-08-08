@@ -66,6 +66,7 @@ ecommerce-project/
 ├── .gitignore
 └── README.md
 
+```
 
 ---
 
