@@ -22,9 +22,13 @@ function EditProduct() {
 
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const fetchProduct = async () => {
     try {
+      setLoading(true);
+      setErrorMessage("");
+
       const data = await getAdminProductById(id);
 
       setProduct({
@@ -35,10 +39,13 @@ function EditProduct() {
         category: data.product.category,
         image: data.product.image,
       });
-
-      setLoading(false);
     } catch (error) {
       console.log("Failed to fetch product:", error);
+
+      setErrorMessage(
+        "Failed to load product. Please try again."
+      );
+    } finally {
       setLoading(false);
     }
   };
@@ -54,21 +61,67 @@ function EditProduct() {
       ...prevProduct,
       [name]: value,
     }));
+
+    setErrorMessage("");
+  };
+
+  const validateProduct = () => {
+    if (!product.name.trim()) {
+      return "Product name is required.";
+    }
+
+    if (!product.description.trim()) {
+      return "Description is required.";
+    }
+
+    if (product.price === "") {
+      return "Price is required.";
+    }
+
+    if (Number(product.price) <= 0) {
+      return "Price must be greater than 0.";
+    }
+
+    if (product.stock === "") {
+      return "Stock is required.";
+    }
+
+    if (Number(product.stock) < 0) {
+      return "Stock cannot be negative.";
+    }
+
+    if (!product.category.trim()) {
+      return "Category is required.";
+    }
+
+    if (!product.image.trim()) {
+      return "Image URL is required.";
+    }
+
+    return "";
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const validationError = validateProduct();
+
+    if (validationError) {
+      setErrorMessage(validationError);
+      return;
+    }
+
     try {
       setUpdating(true);
+      setErrorMessage("");
 
       const data = await updateAdminProduct(id, {
-        name: product.name,
-        description: product.description,
+        name: product.name.trim(),
+        description: product.description.trim(),
         price: Number(product.price),
         stock: Number(product.stock),
-        category: product.category,
-        image: product.image,
+        category: product.category.trim(),
+        image: product.image.trim(),
       });
 
       console.log("Product updated successfully:", data);
@@ -80,6 +133,10 @@ function EditProduct() {
       });
     } catch (error) {
       console.log("Failed to update product:", error);
+
+      setErrorMessage(
+        "Failed to update product. Please try again."
+      );
     } finally {
       setUpdating(false);
     }
@@ -88,7 +145,9 @@ function EditProduct() {
   if (loading) {
     return (
       <AdminLayout>
-        <p>Loading...</p>
+        <p className="text-gray-500">
+          Loading product...
+        </p>
       </AdminLayout>
     );
   }
@@ -99,6 +158,12 @@ function EditProduct() {
         <h2 className="text-3xl font-bold mb-6">
           Edit Product
         </h2>
+
+        {errorMessage && (
+          <div className="mb-6 bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg">
+            {errorMessage}
+          </div>
+        )}
 
         <form
           onSubmit={handleSubmit}
@@ -114,6 +179,7 @@ function EditProduct() {
               name="name"
               value={product.name}
               onChange={handleChange}
+              required
               className="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -128,6 +194,7 @@ function EditProduct() {
               value={product.description}
               onChange={handleChange}
               rows="4"
+              required
               className="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -142,6 +209,8 @@ function EditProduct() {
               name="price"
               value={product.price}
               onChange={handleChange}
+              min="0"
+              required
               className="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -156,6 +225,8 @@ function EditProduct() {
               name="stock"
               value={product.stock}
               onChange={handleChange}
+              min="0"
+              required
               className="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -170,6 +241,7 @@ function EditProduct() {
               name="category"
               value={product.category}
               onChange={handleChange}
+              required
               className="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
@@ -184,6 +256,7 @@ function EditProduct() {
               name="image"
               value={product.image}
               onChange={handleChange}
+              required
               className="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
