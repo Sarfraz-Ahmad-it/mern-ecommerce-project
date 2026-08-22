@@ -17,6 +17,7 @@ function AddProduct() {
   });
 
   const [creating, setCreating] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -25,21 +26,67 @@ function AddProduct() {
       ...prevProduct,
       [name]: value,
     }));
+
+    setErrorMessage("");
+  };
+
+  const validateProduct = () => {
+    if (!product.name.trim()) {
+      return "Product name is required.";
+    }
+
+    if (!product.description.trim()) {
+      return "Description is required.";
+    }
+
+    if (product.price === "") {
+      return "Price is required.";
+    }
+
+    if (Number(product.price) <= 0) {
+      return "Price must be greater than 0.";
+    }
+
+    if (product.stock === "") {
+      return "Stock is required.";
+    }
+
+    if (Number(product.stock) < 0) {
+      return "Stock cannot be negative.";
+    }
+
+    if (!product.category.trim()) {
+      return "Category is required.";
+    }
+
+    if (!product.image.trim()) {
+      return "Image URL is required.";
+    }
+
+    return "";
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    const validationError = validateProduct();
+
+    if (validationError) {
+      setErrorMessage(validationError);
+      return;
+    }
+
     try {
       setCreating(true);
+      setErrorMessage("");
 
       const data = await createAdminProduct({
-        name: product.name,
-        description: product.description,
+        name: product.name.trim(),
+        description: product.description.trim(),
         price: Number(product.price),
         stock: Number(product.stock),
-        category: product.category,
-        image: product.image,
+        category: product.category.trim(),
+        image: product.image.trim(),
       });
 
       console.log("Product created successfully:", data);
@@ -51,6 +98,10 @@ function AddProduct() {
       });
     } catch (error) {
       console.log("Failed to create product:", error);
+
+      setErrorMessage(
+        "Failed to create product. Please try again."
+      );
     } finally {
       setCreating(false);
     }
@@ -62,6 +113,12 @@ function AddProduct() {
         <h2 className="text-3xl font-bold mb-6">
           Add Product
         </h2>
+
+        {errorMessage && (
+          <div className="mb-6 bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg">
+            {errorMessage}
+          </div>
+        )}
 
         <form
           onSubmit={handleSubmit}
