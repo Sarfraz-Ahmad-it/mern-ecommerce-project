@@ -28,6 +28,13 @@ function Sidebar() {
         >
           Add Product
         </Link>
+
+        <Link
+          to="/orders"
+          className="block px-4 py-3 rounded-lg hover:bg-gray-800"
+        >
+          Orders
+        </Link>
       </nav>
     </aside>
   );
