@@ -80,3 +80,10 @@ export const updateAdminOrderStatus = async (id, status) => {
 
   return response.data;
 };
+
+// Get dashboard statistics
+export const getDashboardStats = async () => {
+  const response = await api.get("/dashboard/stats");
+
+  return response.data;
+};

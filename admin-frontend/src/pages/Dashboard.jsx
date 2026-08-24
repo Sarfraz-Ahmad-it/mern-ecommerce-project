@@ -1,87 +1,160 @@
 import { useEffect, useState } from "react";
+
 import AdminLayout from "../layouts/AdminLayout";
-import { getAdminProducts } from "../services/adminService";
+import { getDashboardStats } from "../services/adminService";
 
 function Dashboard() {
-  const [products, setProducts] = useState([]);
+  const [stats, setStats] = useState({
+    totalProducts: 0,
+    lowStockProducts: 0,
+    totalOrders: 0,
+    pendingOrders: 0,
+    confirmedOrders: 0,
+    shippedOrders: 0,
+    deliveredOrders: 0,
+    cancelledOrders: 0,
+  });
+
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const fetchDashboardStats = async () => {
+    try {
+      setLoading(true);
+      setErrorMessage("");
+
+      const data = await getDashboardStats();
+
+      setStats(data.stats);
+    } catch (error) {
+      console.log(
+        "Failed to fetch dashboard stats:",
+        error
+      );
+
+      setErrorMessage(
+        "Failed to load dashboard statistics."
+      );
+    } finally {
+      setLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDashboardData = async () => {
-      try {
-        setLoading(true);
-        setError("");
-
-        const data = await getAdminProducts();
-
-        setProducts(data.products || data);
-      } catch (error) {
-        console.error("Failed to fetch dashboard data:", error);
-
-        setError("Failed to load dashboard data.");
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchDashboardData();
+    fetchDashboardStats();
   }, []);
-
-  const totalProducts = products.length;
-
-  const outOfStockProducts = products.filter(
-    (product) => product.stock === 0
-  ).length;
-
-  const lowStockProducts = products.filter(
-    (product) => product.stock > 0 && product.stock <= 5
-  ).length;
 
   return (
     <AdminLayout>
-      <h2 className="text-3xl font-bold mb-6">
-        Dashboard
-      </h2>
+      <div className="w-full">
+        <div className="mb-6">
+          <h2 className="text-2xl sm:text-3xl font-bold">
+            Dashboard
+          </h2>
 
-      {error && (
-        <div className="bg-red-100 text-red-700 px-4 py-3 rounded-lg mb-6">
-          {error}
-        </div>
-      )}
-
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="text-gray-500">
-            Total Products
-          </h3>
-
-          <p className="text-3xl font-bold mt-2">
-            {loading ? "..." : totalProducts}
+          <p className="text-gray-500 mt-1">
+            Overview of your store.
           </p>
         </div>
 
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="text-gray-500">
-            Out of Stock
-          </h3>
+        {errorMessage && (
+          <div className="mb-6 bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg">
+            {errorMessage}
+          </div>
+        )}
 
-          <p className="text-3xl font-bold mt-2">
-            {loading ? "..." : outOfStockProducts}
-          </p>
-        </div>
+        {loading ? (
+          <div className="flex items-center justify-center py-16">
+            <p className="text-gray-500">
+              Loading dashboard...
+            </p>
+          </div>
+        ) : (
+          <>
+            {/* Main Statistics */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="bg-white p-5 sm:p-6 rounded-xl shadow">
+                <h3 className="text-gray-500 text-sm">
+                  Total Products
+                </h3>
 
-        <div className="bg-white p-6 rounded-xl shadow">
-          <h3 className="text-gray-500">
-            Low Stock
-          </h3>
+                <p className="text-3xl font-bold mt-2">
+                  {stats.totalProducts}
+                </p>
+              </div>
 
-          <p className="text-3xl font-bold mt-2">
-            {loading ? "..." : lowStockProducts}
-          </p>
-        </div>
+              <div className="bg-white p-5 sm:p-6 rounded-xl shadow">
+                <h3 className="text-gray-500 text-sm">
+                  Low Stock Products
+                </h3>
 
+                <p className="text-3xl font-bold mt-2">
+                  {stats.lowStockProducts}
+                </p>
+              </div>
+
+              <div className="bg-white p-5 sm:p-6 rounded-xl shadow">
+                <h3 className="text-gray-500 text-sm">
+                  Total Orders
+                </h3>
+
+                <p className="text-3xl font-bold mt-2">
+                  {stats.totalOrders}
+                </p>
+              </div>
+
+              <div className="bg-white p-5 sm:p-6 rounded-xl shadow">
+                <h3 className="text-gray-500 text-sm">
+                  Pending Orders
+                </h3>
+
+                <p className="text-3xl font-bold mt-2">
+                  {stats.pendingOrders}
+                </p>
+              </div>
+
+              <div className="bg-white p-5 sm:p-6 rounded-xl shadow">
+                <h3 className="text-gray-500 text-sm">
+                  Confirmed Orders
+                </h3>
+
+                <p className="text-3xl font-bold mt-2">
+                  {stats.confirmedOrders}
+                </p>
+              </div>
+
+              <div className="bg-white p-5 sm:p-6 rounded-xl shadow">
+                <h3 className="text-gray-500 text-sm">
+                  Shipped Orders
+                </h3>
+
+                <p className="text-3xl font-bold mt-2">
+                  {stats.shippedOrders}
+                </p>
+              </div>
+
+              <div className="bg-white p-5 sm:p-6 rounded-xl shadow">
+                <h3 className="text-gray-500 text-sm">
+                  Delivered Orders
+                </h3>
+
+                <p className="text-3xl font-bold mt-2">
+                  {stats.deliveredOrders}
+                </p>
+              </div>
+
+              <div className="bg-white p-5 sm:p-6 rounded-xl shadow">
+                <h3 className="text-gray-500 text-sm">
+                  Cancelled Orders
+                </h3>
+
+                <p className="text-3xl font-bold mt-2">
+                  {stats.cancelledOrders}
+                </p>
+              </div>
+            </div>
+          </>
+        )}
       </div>
     </AdminLayout>
   );
