@@ -13,7 +13,7 @@ function AdminLayout({ children }) {
         setSidebarOpen={setSidebarOpen}
       />
 
-      <div className="md:ml-64">
+      <div className="xl:ml-64">
         <Navbar
           sidebarOpen={sidebarOpen}
           setSidebarOpen={setSidebarOpen}

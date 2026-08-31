@@ -17,7 +17,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
           w-64 h-screen
           bg-gray-900 text-white p-6
           transform transition-transform duration-300
-          md:translate-x-0
+          xl:translate-x-0
           ${sidebarOpen ? "translate-x-0" : "-translate-x-full"}
         `}
       >
@@ -29,7 +29,7 @@ function Sidebar({ sidebarOpen, setSidebarOpen }) {
           {/* Mobile Close Button */}
           <button
             onClick={() => setSidebarOpen(false)}
-            className="text-gray-300 hover:text-white text-2xl md:hidden"
+            className="text-gray-300 hover:text-white text-2xl xl:hidden"
           >
             ×
           </button>

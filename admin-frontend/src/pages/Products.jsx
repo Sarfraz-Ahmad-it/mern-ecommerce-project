@@ -129,7 +129,7 @@ function Products() {
               {/* =========================
                   Mobile Product Cards
               ========================== */}
-              <div className="p-4 space-y-4 md:hidden">
+              <div className="p-4 space-y-4 lg:hidden">
                 {products.map((product) => (
                   <div
                     key={product._id}

@@ -20,7 +20,7 @@ function Navbar({ setSidebarOpen }) {
           {/* Mobile Menu Button */}
           <button
             onClick={() => setSidebarOpen(true)}
-            className="text-gray-700 text-2xl md:hidden"
+            className="text-gray-700 text-2xl xl:hidden"
             aria-label="Open menu"
           >
             ☰

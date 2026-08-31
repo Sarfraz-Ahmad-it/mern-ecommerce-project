@@ -117,7 +117,7 @@ function Orders() {
         ) : (
           <>
             {/* Mobile Orders */}
-            <div className="space-y-4 md:hidden">
+            <div className="space-y-4 lg:hidden">
               {orders.map((order) => (
                 <div
                   key={order._id}
@@ -269,7 +269,7 @@ function Orders() {
             </div>
 
             {/* Desktop Orders */}
-            <div className="hidden md:block bg-white rounded-xl shadow overflow-x-auto">
+            <div className="hidden lg:block bg-white rounded-xl shadow overflow-x-auto">
               <table className="w-full min-w-[1000px]">
                 <thead className="bg-gray-100">
                   <tr>

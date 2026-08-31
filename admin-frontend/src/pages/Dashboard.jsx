@@ -73,7 +73,7 @@ function Dashboard() {
           <>
             {/* Main Statistics */}
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-              <div className="bg-white p-5 sm:p-6 rounded-xl shadow">
+              <div className="bg-white p-5 sm:p-6 rounded-xl shadow transition-all duration-200 hover:scale-[1.03] hover:shadow-lg">
                 <h3 className="text-gray-500 text-sm">
                   Total Products
                 </h3>
@@ -83,7 +83,7 @@ function Dashboard() {
                 </p>
               </div>
 
-              <div className="bg-white p-5 sm:p-6 rounded-xl shadow">
+              <div className="bg-white p-5 sm:p-6 rounded-xl shadow transition-all duration-200 hover:scale-[1.03] hover:shadow-lg">
                 <h3 className="text-gray-500 text-sm">
                   Low Stock Products
                 </h3>
@@ -93,7 +93,7 @@ function Dashboard() {
                 </p>
               </div>
 
-              <div className="bg-white p-5 sm:p-6 rounded-xl shadow">
+              <div className="bg-white p-5 sm:p-6 rounded-xl shadow transition-all duration-200 hover:scale-[1.03] hover:shadow-lg">
                 <h3 className="text-gray-500 text-sm">
                   Total Orders
                 </h3>
@@ -103,7 +103,7 @@ function Dashboard() {
                 </p>
               </div>
 
-              <div className="bg-white p-5 sm:p-6 rounded-xl shadow">
+              <div className="bg-white p-5 sm:p-6 rounded-xl shadow transition-all duration-200 hover:scale-[1.03] hover:shadow-lg">
                 <h3 className="text-gray-500 text-sm">
                   Pending Orders
                 </h3>
@@ -113,7 +113,7 @@ function Dashboard() {
                 </p>
               </div>
 
-              <div className="bg-white p-5 sm:p-6 rounded-xl shadow">
+              <div className="bg-white p-5 sm:p-6 rounded-xl shadow transition-all duration-200 hover:scale-[1.03] hover:shadow-lg">
                 <h3 className="text-gray-500 text-sm">
                   Confirmed Orders
                 </h3>
@@ -123,7 +123,7 @@ function Dashboard() {
                 </p>
               </div>
 
-              <div className="bg-white p-5 sm:p-6 rounded-xl shadow">
+              <div className="bg-white p-5 sm:p-6 rounded-xl shadow transition-all duration-200 hover:scale-[1.03] hover:shadow-lg">
                 <h3 className="text-gray-500 text-sm">
                   Shipped Orders
                 </h3>
@@ -133,7 +133,7 @@ function Dashboard() {
                 </p>
               </div>
 
-              <div className="bg-white p-5 sm:p-6 rounded-xl shadow">
+              <div className="bg-white p-5 sm:p-6 rounded-xl shadow transition-all duration-200 hover:scale-[1.03] hover:shadow-lg">
                 <h3 className="text-gray-500 text-sm">
                   Delivered Orders
                 </h3>
@@ -143,7 +143,7 @@ function Dashboard() {
                 </p>
               </div>
 
-              <div className="bg-white p-5 sm:p-6 rounded-xl shadow">
+              <div className="bg-white p-5 sm:p-6 rounded-xl shadow transition-all duration-200 hover:scale-[1.03] hover:shadow-lg">
                 <h3 className="text-gray-500 text-sm">
                   Cancelled Orders
                 </h3>
