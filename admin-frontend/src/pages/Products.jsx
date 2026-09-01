@@ -19,6 +19,15 @@ function Products() {
 
   const [productToDelete, setProductToDelete] = useState(null);
 
+  const [searchTerm, setSearchTerm] = useState("");
+
+  const [selectedCategory, setSelectedCategory] =
+    useState("All");
+
+  const [currentPage, setCurrentPage] = useState(1);
+
+  const productsPerPage = 15;
+
   const location = useLocation();
 
   const [successMessage, setSuccessMessage] = useState(
@@ -87,6 +96,49 @@ function Products() {
     }
   };
 
+  // Get unique categories
+  const categories = [
+    "All",
+    ...new Set(
+      products
+        .map((product) => product.category)
+        .filter(Boolean)
+    ),
+  ];
+
+  // Search + Category Filter
+  const filteredProducts = products.filter((product) => {
+    const matchesSearch = product.name
+      .toLowerCase()
+      .includes(searchTerm.toLowerCase());
+
+    const matchesCategory =
+      selectedCategory === "All" ||
+      product.category === selectedCategory;
+
+    return matchesSearch && matchesCategory;
+  });
+
+  // Reset page when search or category changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm, selectedCategory]);
+
+  // Pagination
+  const totalPages = Math.ceil(
+    filteredProducts.length / productsPerPage
+  );
+
+  const startIndex =
+    (currentPage - 1) * productsPerPage;
+
+  const endIndex = startIndex + productsPerPage;
+
+  const currentProducts = filteredProducts.slice(
+    startIndex,
+    endIndex
+  );
+
   return (
     <AdminLayout>
       <div className="w-full">
@@ -99,6 +151,54 @@ function Products() {
           <p className="text-gray-500 mt-1">
             Manage your products.
           </p>
+        </div>
+
+        {/* Search + Category Filter */}
+        <div className="sticky top-0 z-30 bg-white rounded-xl shadow p-4 mb-6">
+          <div className="flex flex-col lg:flex-row gap-4">
+            {/* Search */}
+            <div className="flex-1">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Search Products
+              </label>
+
+              <input
+                type="text"
+                value={searchTerm}
+                onChange={(e) =>
+                  setSearchTerm(e.target.value)
+                }
+                placeholder="Search by product name..."
+                className="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+              />
+            </div>
+
+            {/* Category */}
+            <div className="w-full lg:w-64">
+              <label className="block text-sm font-medium text-gray-700 mb-2">
+                Category
+              </label>
+
+              <select
+                value={selectedCategory}
+                onChange={(e) =>
+                  setSelectedCategory(e.target.value)
+                }
+                className="w-full border rounded-lg px-4 py-3 outline-none focus:ring-2 focus:ring-blue-500 bg-white"
+              >
+                {categories.map((category) => (
+                  <option
+                    key={category}
+                    value={category}
+                  >
+                    {category === "All"
+                      ? "All Categories"
+                      : category}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>
         </div>
 
         {/* Success Message */}
@@ -115,22 +215,36 @@ function Products() {
           </div>
         )}
 
+        {/* Products */}
         <div className="bg-white rounded-xl shadow overflow-hidden">
           {loading ? (
             <div className="text-center py-10 text-gray-500">
               Loading products...
             </div>
-          ) : products.length === 0 ? (
-            <div className="text-center py-10 text-gray-500">
-              No products found
+          ) : filteredProducts.length === 0 ? (
+            <div className="text-center py-10 px-4">
+              <p className="text-gray-500">
+                No products found.
+              </p>
+
+              {(searchTerm ||
+                selectedCategory !== "All") && (
+                <button
+                  onClick={() => {
+                    setSearchTerm("");
+                    setSelectedCategory("All");
+                  }}
+                  className="mt-3 text-blue-600 hover:text-blue-800 font-medium"
+                >
+                  Clear filters
+                </button>
+              )}
             </div>
           ) : (
             <>
-              {/* =========================
-                  Mobile Product Cards
-              ========================== */}
+              {/* Mobile + Tablet Cards */}
               <div className="p-4 space-y-4 lg:hidden">
-                {products.map((product) => (
+                {currentProducts.map((product) => (
                   <div
                     key={product._id}
                     className="border rounded-xl p-4"
@@ -201,10 +315,8 @@ function Products() {
                 ))}
               </div>
 
-              {/* =========================
-                  Desktop Product Table
-              ========================== */}
-              <div className="hidden md:block overflow-x-auto">
+              {/* Desktop Table */}
+              <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full min-w-[800px]">
                   <thead className="bg-gray-100">
                     <tr>
@@ -231,7 +343,7 @@ function Products() {
                   </thead>
 
                   <tbody>
-                    {products.map((product) => (
+                    {currentProducts.map((product) => (
                       <tr
                         key={product._id}
                         className="border-t"
@@ -289,6 +401,73 @@ function Products() {
                   </tbody>
                 </table>
               </div>
+
+              {/* Pagination */}
+              {totalPages > 1 && (
+                <div className="border-t px-4 py-4">
+                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+                    <p className="text-sm text-gray-500">
+                      Showing{" "}
+                      {startIndex + 1}–
+                      {Math.min(
+                        endIndex,
+                        filteredProducts.length
+                      )}{" "}
+                      of {filteredProducts.length} products
+                    </p>
+
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={() =>
+                          setCurrentPage((prev) =>
+                            Math.max(prev - 1, 1)
+                          )
+                        }
+                        disabled={currentPage === 1}
+                        className="px-3 py-2 border rounded-lg text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                      >
+                        Previous
+                      </button>
+
+                      {Array.from(
+                        { length: totalPages },
+                        (_, index) => index + 1
+                      ).map((page) => (
+                        <button
+                          key={page}
+                          onClick={() =>
+                            setCurrentPage(page)
+                          }
+                          className={`min-w-10 px-3 py-2 rounded-lg text-sm border ${
+                            currentPage === page
+                              ? "bg-blue-600 text-white border-blue-600"
+                              : "hover:bg-gray-100"
+                          }`}
+                        >
+                          {page}
+                        </button>
+                      ))}
+
+                      <button
+                        onClick={() =>
+                          setCurrentPage((prev) =>
+                            Math.min(
+                              prev + 1,
+                              totalPages
+                            )
+                          )
+                        }
+                        disabled={
+                          currentPage === totalPages
+                        }
+                        className="px-3 py-2 border rounded-lg text-sm disabled:opacity-40 disabled:cursor-not-allowed hover:bg-gray-100"
+                      >
+                        Next
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </>
           )}
         </div>
