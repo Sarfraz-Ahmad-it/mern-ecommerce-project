@@ -19,6 +19,8 @@ function Products() {
 
   const [productToDelete, setProductToDelete] = useState(null);
 
+  const [previewImage, setPreviewImage] = useState(null);
+
   const [searchTerm, setSearchTerm] = useState("");
 
   const [selectedCategory, setSelectedCategory] =
@@ -142,6 +144,7 @@ function Products() {
   return (
     <AdminLayout>
       <div className="w-full">
+
         {/* Header */}
         <div className="mb-6">
           <h2 className="text-2xl sm:text-3xl font-bold">
@@ -156,6 +159,7 @@ function Products() {
         {/* Search + Category Filter */}
         <div className="sticky top-0 z-30 bg-white rounded-xl shadow p-4 mb-6">
           <div className="flex flex-col lg:flex-row gap-4">
+
             {/* Search */}
             <div className="flex-1">
               <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -217,10 +221,129 @@ function Products() {
 
         {/* Products */}
         <div className="bg-white rounded-xl shadow overflow-hidden">
+
           {loading ? (
-            <div className="text-center py-10 text-gray-500">
-              Loading products...
-            </div>
+            <>
+              {/* Mobile + Tablet Skeleton */}
+              <div className="p-4 space-y-4 lg:hidden animate-pulse">
+                {Array.from({ length: 5 }).map((_, index) => (
+                  <div
+                    key={index}
+                    className="border rounded-xl p-4"
+                  >
+                    <div className="flex items-center gap-4">
+
+                      {/* Image */}
+                      <div className="w-20 h-20 bg-gray-200 rounded-lg shrink-0" />
+
+                      <div className="flex-1 min-w-0">
+                        {/* Product Name */}
+                        <div className="h-4 bg-gray-200 rounded w-3/4" />
+
+                        {/* Category */}
+                        <div className="h-3 bg-gray-200 rounded w-1/2 mt-3" />
+                      </div>
+                    </div>
+
+                    {/* Price + Stock */}
+                    <div className="grid grid-cols-2 gap-4 mt-4">
+
+                      <div>
+                        <div className="h-3 bg-gray-200 rounded w-12" />
+                        <div className="h-4 bg-gray-200 rounded w-16 mt-2" />
+                      </div>
+
+                      <div>
+                        <div className="h-3 bg-gray-200 rounded w-12" />
+                        <div className="h-4 bg-gray-200 rounded w-16 mt-2" />
+                      </div>
+
+                    </div>
+
+                    {/* Buttons */}
+                    <div className="flex gap-3 mt-4">
+                      <div className="h-10 bg-gray-200 rounded-lg flex-1" />
+                      <div className="h-10 bg-gray-200 rounded-lg flex-1" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Desktop Table Skeleton */}
+              <div className="hidden lg:block overflow-x-auto animate-pulse">
+                <table className="w-full min-w-[800px]">
+
+                  <thead className="bg-gray-100">
+                    <tr>
+                      <th className="text-left px-6 py-4">
+                        Product
+                      </th>
+
+                      <th className="text-left px-6 py-4">
+                        Category
+                      </th>
+
+                      <th className="text-left px-6 py-4">
+                        Price
+                      </th>
+
+                      <th className="text-left px-6 py-4">
+                        Stock
+                      </th>
+
+                      <th className="text-left px-6 py-4">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    {Array.from({ length: 6 }).map(
+                      (_, index) => (
+                        <tr
+                          key={index}
+                          className="border-t"
+                        >
+                          {/* Product */}
+                          <td className="px-6 py-4">
+                            <div className="flex items-center gap-4">
+
+                              <div className="w-14 h-14 bg-gray-200 rounded-lg" />
+
+                              <div className="h-4 bg-gray-200 rounded w-40" />
+                            </div>
+                          </td>
+
+                          {/* Category */}
+                          <td className="px-6 py-4">
+                            <div className="h-4 bg-gray-200 rounded w-24" />
+                          </td>
+
+                          {/* Price */}
+                          <td className="px-6 py-4">
+                            <div className="h-4 bg-gray-200 rounded w-16" />
+                          </td>
+
+                          {/* Stock */}
+                          <td className="px-6 py-4">
+                            <div className="h-4 bg-gray-200 rounded w-12" />
+                          </td>
+
+                          {/* Actions */}
+                          <td className="px-6 py-4">
+                            <div className="flex gap-4">
+                              <div className="h-4 bg-gray-200 rounded w-10" />
+                              <div className="h-4 bg-gray-200 rounded w-14" />
+                            </div>
+                          </td>
+                        </tr>
+                      )
+                    )}
+                  </tbody>
+
+                </table>
+              </div>
+            </>
           ) : filteredProducts.length === 0 ? (
             <div className="text-center py-10 px-4">
               <p className="text-gray-500">
@@ -250,10 +373,14 @@ function Products() {
                     className="border rounded-xl p-4"
                   >
                     <div className="flex items-center gap-4">
+
                       <img
                         src={product.image}
                         alt={product.name}
-                        className="w-20 h-20 object-cover rounded-lg shrink-0"
+                        onClick={() =>
+                          setPreviewImage(product.image)
+                        }
+                        className="w-20 h-20 object-cover rounded-lg shrink-0 cursor-pointer hover:opacity-80 transition"
                       />
 
                       <div className="min-w-0">
@@ -268,6 +395,7 @@ function Products() {
                     </div>
 
                     <div className="grid grid-cols-2 gap-4 mt-4">
+
                       <div>
                         <p className="text-sm text-gray-500">
                           Price
@@ -287,9 +415,11 @@ function Products() {
                           {product.stock}
                         </p>
                       </div>
+
                     </div>
 
                     <div className="flex gap-3 mt-4">
+
                       <Link
                         to={`/edit-product/${product._id}`}
                         className="flex-1 text-center border border-blue-600 text-blue-600 py-2 rounded-lg hover:bg-blue-50"
@@ -310,6 +440,7 @@ function Products() {
                           ? "Deleting..."
                           : "Delete"}
                       </button>
+
                     </div>
                   </div>
                 ))}
@@ -318,8 +449,10 @@ function Products() {
               {/* Desktop Table */}
               <div className="hidden lg:block overflow-x-auto">
                 <table className="w-full min-w-[800px]">
+
                   <thead className="bg-gray-100">
                     <tr>
+
                       <th className="text-left px-6 py-4">
                         Product
                       </th>
@@ -339,6 +472,7 @@ function Products() {
                       <th className="text-left px-6 py-4">
                         Actions
                       </th>
+
                     </tr>
                   </thead>
 
@@ -348,17 +482,23 @@ function Products() {
                         key={product._id}
                         className="border-t"
                       >
+
                         <td className="px-6 py-4">
                           <div className="flex items-center gap-4">
+
                             <img
                               src={product.image}
                               alt={product.name}
-                              className="w-14 h-14 object-cover rounded-lg"
+                              onClick={() =>
+                                setPreviewImage(product.image)
+                              }
+                              className="w-14 h-14 object-cover rounded-lg cursor-pointer hover:opacity-80 transition"
                             />
 
                             <span className="font-medium">
                               {product.name}
                             </span>
+
                           </div>
                         </td>
 
@@ -375,6 +515,7 @@ function Products() {
                         </td>
 
                         <td className="px-6 py-4">
+
                           <Link
                             to={`/edit-product/${product._id}`}
                             className="text-blue-600 mr-4 hover:text-blue-800"
@@ -395,17 +536,22 @@ function Products() {
                               ? "Deleting..."
                               : "Delete"}
                           </button>
+
                         </td>
+
                       </tr>
                     ))}
                   </tbody>
+
                 </table>
               </div>
 
               {/* Pagination */}
               {totalPages > 1 && (
                 <div className="border-t px-4 py-4">
+
                   <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+
                     <p className="text-sm text-gray-500">
                       Showing{" "}
                       {startIndex + 1}–
@@ -417,6 +563,7 @@ function Products() {
                     </p>
 
                     <div className="flex items-center gap-2">
+
                       <button
                         onClick={() =>
                           setCurrentPage((prev) =>
@@ -464,6 +611,7 @@ function Products() {
                       >
                         Next
                       </button>
+
                     </div>
                   </div>
                 </div>
@@ -473,10 +621,41 @@ function Products() {
         </div>
       </div>
 
+      {/* Image Preview Modal */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 bg-black/70 flex items-center justify-center z-50 px-4"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div
+            className="relative max-w-3xl w-full flex justify-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+
+            <button
+              onClick={() => setPreviewImage(null)}
+              className="absolute -top-10 right-0 text-white text-3xl font-bold hover:text-gray-300"
+              aria-label="Close image preview"
+            >
+              ×
+            </button>
+
+            <img
+              src={previewImage}
+              alt="Product Preview"
+              className="max-h-[80vh] max-w-full object-contain rounded-xl shadow-2xl"
+            />
+
+          </div>
+        </div>
+      )}
+
       {/* Delete Confirmation Modal */}
       {productToDelete && (
         <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 px-4">
+
           <div className="bg-white rounded-xl shadow-xl w-full max-w-md p-5 sm:p-6">
+
             <h3 className="text-xl font-bold mb-3">
               Delete Product?
             </h3>
@@ -490,6 +669,7 @@ function Products() {
             </p>
 
             <div className="flex flex-col-reverse sm:flex-row sm:justify-end gap-3">
+
               <button
                 onClick={() => setProductToDelete(null)}
                 disabled={
@@ -513,10 +693,12 @@ function Products() {
                   ? "Deleting..."
                   : "Delete"}
               </button>
+
             </div>
           </div>
         </div>
       )}
+
     </AdminLayout>
   );
 }
