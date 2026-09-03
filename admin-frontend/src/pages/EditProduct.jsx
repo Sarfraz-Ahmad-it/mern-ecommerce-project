@@ -142,12 +142,59 @@ function EditProduct() {
     }
   };
 
+  // Loading Skeleton
   if (loading) {
     return (
       <AdminLayout>
-        <p className="text-gray-500">
-          Loading product...
-        </p>
+        <div className="max-w-2xl animate-pulse">
+
+          {/* Heading Skeleton */}
+          <div className="h-9 bg-gray-200 rounded w-48 mb-6" />
+
+          {/* Form Skeleton */}
+          <div className="bg-white p-6 rounded-xl shadow space-y-5">
+
+            {/* Product Name */}
+            <div>
+              <div className="h-4 bg-gray-200 rounded w-32 mb-2" />
+              <div className="h-12 bg-gray-200 rounded-lg w-full" />
+            </div>
+
+            {/* Description */}
+            <div>
+              <div className="h-4 bg-gray-200 rounded w-28 mb-2" />
+              <div className="h-28 bg-gray-200 rounded-lg w-full" />
+            </div>
+
+            {/* Price */}
+            <div>
+              <div className="h-4 bg-gray-200 rounded w-16 mb-2" />
+              <div className="h-12 bg-gray-200 rounded-lg w-full" />
+            </div>
+
+            {/* Stock */}
+            <div>
+              <div className="h-4 bg-gray-200 rounded w-16 mb-2" />
+              <div className="h-12 bg-gray-200 rounded-lg w-full" />
+            </div>
+
+            {/* Category */}
+            <div>
+              <div className="h-4 bg-gray-200 rounded w-20 mb-2" />
+              <div className="h-12 bg-gray-200 rounded-lg w-full" />
+            </div>
+
+            {/* Image URL */}
+            <div>
+              <div className="h-4 bg-gray-200 rounded w-24 mb-2" />
+              <div className="h-12 bg-gray-200 rounded-lg w-full" />
+            </div>
+
+            {/* Button */}
+            <div className="h-12 bg-gray-200 rounded-lg w-full" />
+
+          </div>
+        </div>
       </AdminLayout>
     );
   }
@@ -155,20 +202,26 @@ function EditProduct() {
   return (
     <AdminLayout>
       <div className="max-w-2xl">
-        <h2 className="text-3xl font-bold mb-6">
+
+        {/* Header */}
+        <h2 className="text-2xl sm:text-3xl font-bold mb-6">
           Edit Product
         </h2>
 
+        {/* Error Message */}
         {errorMessage && (
           <div className="mb-6 bg-red-100 border border-red-300 text-red-700 px-4 py-3 rounded-lg">
             {errorMessage}
           </div>
         )}
 
+        {/* Form */}
         <form
           onSubmit={handleSubmit}
-          className="bg-white p-6 rounded-xl shadow space-y-5"
+          className="bg-white p-5 sm:p-6 rounded-xl shadow space-y-5"
         >
+
+          {/* Product Name */}
           <div>
             <label className="block mb-2 font-medium">
               Product Name
@@ -184,6 +237,7 @@ function EditProduct() {
             />
           </div>
 
+          {/* Description */}
           <div>
             <label className="block mb-2 font-medium">
               Description
@@ -199,6 +253,7 @@ function EditProduct() {
             />
           </div>
 
+          {/* Price */}
           <div>
             <label className="block mb-2 font-medium">
               Price
@@ -215,6 +270,7 @@ function EditProduct() {
             />
           </div>
 
+          {/* Stock */}
           <div>
             <label className="block mb-2 font-medium">
               Stock
@@ -231,6 +287,7 @@ function EditProduct() {
             />
           </div>
 
+          {/* Category */}
           <div>
             <label className="block mb-2 font-medium">
               Category
@@ -246,6 +303,7 @@ function EditProduct() {
             />
           </div>
 
+          {/* Image URL */}
           <div>
             <label className="block mb-2 font-medium">
               Image URL
@@ -261,13 +319,15 @@ function EditProduct() {
             />
           </div>
 
+          {/* Update Button */}
           <button
             type="submit"
             disabled={updating}
-            className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50"
+            className="w-full bg-blue-600 text-white py-3 rounded-lg font-medium hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {updating ? "Updating..." : "Update Product"}
           </button>
+
         </form>
       </div>
     </AdminLayout>
