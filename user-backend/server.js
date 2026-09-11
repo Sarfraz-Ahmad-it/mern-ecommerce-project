@@ -1,4 +1,7 @@
+const authRoutes = require("./src/routes/authRoutes");
 const productRoutes = require("./src/routes/productRoutes");
+const userRoutes = require("./src/routes/userRoutes");
+
 const express = require("express");
 const dotenv = require("dotenv");
 const connectDB = require("./src/config/db");
@@ -15,6 +18,8 @@ app.use(cors());
 app.use(express.json());
 
 app.use("/api/products", productRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/users", userRoutes);
 
 const PORT = process.env.PORT || 5001;
 
