@@ -3,6 +3,7 @@ const express = require("express");
 const {
   registerUser,
   loginUser,
+  getProfile,
 } = require("../controllers/authController");
 
 const authMiddleware = require("../middleware/authMiddleware");
@@ -20,11 +21,6 @@ router.get("/test", (req, res) => {
   });
 });
 
-router.get("/profile", authMiddleware, (req, res) => {
-  res.status(200).json({
-    message: "You are authenticated",
-    userId: req.userId,
-  });
-});
+router.get("/profile", authMiddleware, getProfile);
 
 module.exports = router;
