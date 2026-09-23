@@ -128,10 +128,11 @@ const getCart = async (req, res) => {
 
 const updateCartQuantity = async (req, res) => {
   try {
-    const { productId, quantity } = req.body;
+    const { productId } = req.params;
+    const { quantity } = req.body;
 
     // Check required fields
-    if (!productId || !quantity) {
+    if (!productId || quantity === undefined) {
       return res.status(400).json({
         message: "Product ID and quantity are required",
       });
