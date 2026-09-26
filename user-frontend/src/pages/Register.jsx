@@ -1,8 +1,14 @@
 import { useState } from "react";
 import axios from "axios";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Register() {
+  const { login } = useAuth();
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -10,8 +16,6 @@ function Register() {
   });
 
   const [message, setMessage] = useState("");
-
-  const navigate = useNavigate();
 
   const handleChange = (e) => {
     setFormData({
@@ -29,20 +33,18 @@ function Register() {
         formData
       );
 
-      setMessage(response.data.message || "Registration successful");
+      // Login the newly registered user immediately
+      login(response.data.token);
 
-      setFormData({
-        name: "",
-        email: "",
-        password: "",
-      });
+      // Return to the page the user originally came from
+      const redirectTo =
+        location.state?.from || "/";
 
-      setTimeout(() => {
-        navigate("/login");
-      }, 1000);
+      navigate(redirectTo);
     } catch (error) {
       setMessage(
-        error.response?.data?.message || "Registration failed"
+        error.response?.data?.message ||
+          "Registration failed"
       );
     }
   };
@@ -50,6 +52,7 @@ function Register() {
   return (
     <div className="min-h-screen bg-gray-100 px-4 py-8 sm:px-6 sm:py-12 flex items-center justify-center">
       <div className="w-full max-w-md bg-white rounded-xl shadow-md p-5 sm:p-8">
+
         {/* Heading */}
         <div className="text-center mb-6 sm:mb-8">
           <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
@@ -62,7 +65,10 @@ function Register() {
         </div>
 
         {/* Register Form */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4"
+        >
           {/* Name */}
           <div>
             <label
@@ -137,7 +143,7 @@ function Register() {
 
         {/* Message */}
         {message && (
-          <p className="mt-4 text-center text-sm text-gray-700">
+          <p className="mt-4 text-center text-sm text-red-600">
             {message}
           </p>
         )}
@@ -147,11 +153,15 @@ function Register() {
           Already have an account?{" "}
           <Link
             to="/login"
+            state={{
+              from: location.state?.from || "/",
+            }}
             className="font-semibold text-black hover:underline"
           >
             Login
           </Link>
         </p>
+
       </div>
     </div>
   );
