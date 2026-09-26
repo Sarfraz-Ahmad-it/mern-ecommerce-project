@@ -1,25 +1,25 @@
 import { useEffect, useState } from "react";
-import { useParams } from "react-router-dom";
-
+import { useParams, useNavigate } from "react-router-dom";
 import { getProductById } from "../services/productService";
-import { addToCart } from "../services/cartService";
-import { useCart } from "../context/CartContext";
+import {
+  addToCart,
+  getCart,
+} from "../services/cartService";
 
 function ProductDetails() {
   const { id } = useParams();
-
-  const { updateCartState } = useCart();
+  const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [message, setMessage] = useState("");
   const [loading, setLoading] = useState(false);
+  const [inCart, setInCart] = useState(false);
 
   useEffect(() => {
     const fetchProduct = async () => {
       try {
         const data = await getProductById(id);
-
         setProduct(data.product);
       } catch (error) {
         console.error(
@@ -32,14 +32,50 @@ function ProductDetails() {
     fetchProduct();
   }, [id]);
 
+  useEffect(() => {
+    const checkCart = async () => {
+      const token = localStorage.getItem("token");
+
+      if (!token) {
+        return;
+      }
+
+      try {
+        const data = await getCart();
+
+        const itemExists = data.cart?.items?.some(
+          (item) =>
+            item.product?._id === id ||
+            item.product === id
+        );
+
+        setInCart(!!itemExists);
+      } catch (error) {
+        console.error(
+          "Failed to check cart:",
+          error
+        );
+      }
+    };
+
+    checkCart();
+  }, [id]);
+
   const handleAddToCart = async () => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      setMessage(
-        "Please login to add products to cart."
-      );
+      navigate("/login", {
+        state: {
+          from: `/products/${id}`,
+        },
+      });
 
+      return;
+    }
+
+    if (inCart) {
+      navigate("/cart");
       return;
     }
 
@@ -52,12 +88,11 @@ function ProductDetails() {
         quantity
       );
 
-      // Update CartContext
-      updateCartState(data.cart);
-
       setMessage(
         data.message || "Product added to cart"
       );
+
+      setInCart(true);
     } catch (error) {
       setMessage(
         error.response?.data?.message ||
@@ -162,10 +197,16 @@ function ProductDetails() {
                 loading ||
                 product.stock === 0
               }
-              className="w-full sm:w-auto bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
+              className={`w-full sm:w-auto text-white px-6 py-3 rounded-lg ${
+                inCart
+                  ? "bg-blue-600 hover:bg-blue-700"
+                  : "bg-blue-600 hover:bg-blue-700"
+              } disabled:bg-gray-400 disabled:cursor-not-allowed`}
             >
               {loading
                 ? "Adding..."
+                : inCart
+                ? "Go to Cart"
                 : "Add to Cart"}
             </button>
 
