@@ -34,7 +34,10 @@ function Register() {
       );
 
       // Login the newly registered user immediately
-      login(response.data.token);
+      login(
+      response.data.token,
+      response.data.user
+     );
 
       // Return to the page the user originally came from
       const redirectTo =
