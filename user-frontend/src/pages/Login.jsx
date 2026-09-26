@@ -1,7 +1,18 @@
 import { useState } from "react";
 import axios from "axios";
+import {
+  Link,
+  useNavigate,
+  useLocation,
+} from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Login() {
+  const { login } = useAuth();
+
+  const navigate = useNavigate();
+  const location = useLocation();
+
   const [formData, setFormData] = useState({
     email: "",
     password: "",
@@ -25,24 +36,34 @@ function Login() {
         formData
       );
 
-      localStorage.setItem("token", response.data.token);
+      // Update AuthContext
+      login(response.data.token);
 
-      setMessage("Login successful");
+      // Return to the page user came from
+      const redirectTo =
+        location.state?.from || "/";
+
+      navigate(redirectTo);
     } catch (error) {
       setMessage(
-        error.response?.data?.message || "Login failed"
+        error.response?.data?.message ||
+          "Login failed"
       );
     }
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
-      <div className="w-full max-w-md bg-white p-8 rounded-lg shadow">
+      <div className="w-full max-w-md bg-white p-6 sm:p-8 rounded-lg shadow">
+
         <h1 className="text-2xl font-bold text-center mb-6">
           Login
         </h1>
 
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          className="space-y-4"
+        >
           <input
             type="email"
             name="email"
@@ -76,6 +97,21 @@ function Login() {
             {message}
           </p>
         )}
+
+        {/* Register Link */}
+        <p className="text-center mt-6 text-sm text-gray-600">
+          Don't have an account?{" "}
+          <Link
+            to="/register"
+            state={{
+              from: location.state?.from || "/",
+            }}
+            className="font-semibold text-black hover:underline"
+          >
+            Register
+          </Link>
+        </p>
+
       </div>
     </div>
   );
