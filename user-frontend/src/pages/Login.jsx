@@ -37,7 +37,10 @@ function Login() {
       );
 
       // Update AuthContext
-      login(response.data.token);
+            login(
+                response.data.token,
+                response.data.user
+               );
 
       // Return to the page user came from
       const redirectTo =
