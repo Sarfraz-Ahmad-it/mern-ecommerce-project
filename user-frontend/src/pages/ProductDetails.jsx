@@ -13,6 +13,7 @@ function ProductDetails() {
   const [product, setProduct] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [message, setMessage] = useState("");
+  const [toast, setToast] = useState("");
   const [loading, setLoading] = useState(false);
   const [inCart, setInCart] = useState(false);
 
@@ -68,6 +69,7 @@ function ProductDetails() {
       navigate("/login", {
         state: {
           from: `/products/${id}`,
+          loginRequired: true,
         },
       });
 
@@ -88,11 +90,15 @@ function ProductDetails() {
         quantity
       );
 
-      setMessage(
-        data.message || "Product added to cart"
-      );
-
       setInCart(true);
+
+      // Show toast
+      setToast("Item added to cart");
+
+      // Hide toast after 2.5 seconds
+      setTimeout(() => {
+        setToast("");
+      }, 2500);
     } catch (error) {
       setMessage(
         error.response?.data?.message ||
@@ -192,22 +198,22 @@ function ProductDetails() {
           <div className="flex flex-col sm:flex-row gap-3">
 
             <button
-              onClick={handleAddToCart}
-              disabled={
-                loading ||
-                product.stock === 0
-              }
-              className={`w-full sm:w-auto text-white px-6 py-3 rounded-lg ${
-                inCart
-                  ? "bg-blue-600 hover:bg-blue-700"
-                  : "bg-blue-600 hover:bg-blue-700"
-              } disabled:bg-gray-400 disabled:cursor-not-allowed`}
-            >
-              {loading
-                ? "Adding..."
-                : inCart
-                ? "Go to Cart"
-                : "Add to Cart"}
+                onClick={handleAddToCart}
+                disabled={
+                  loading ||
+                  product.stock === 0
+                }
+                className={`w-full sm:w-auto px-6 py-3 rounded-lg font-medium transition ${
+                  inCart
+                    ? "bg-blue-600 text-white hover:bg-blue-700"
+                    : "bg-white text-black border border-black hover:bg-gray-100"
+                } disabled:bg-gray-400 disabled:text-white disabled:border-gray-400 disabled:cursor-not-allowed`}
+              >
+                {loading
+                  ? "Adding..."
+                  : inCart
+                  ? "Go to Cart"
+                  : "Add to Cart"}
             </button>
 
             <button
@@ -218,14 +224,31 @@ function ProductDetails() {
 
           </div>
 
-          {/* Message */}
+          {/* Error Message */}
           {message && (
-            <p className="mt-4 text-sm sm:text-base text-blue-600">
+            <p className="mt-4 text-sm sm:text-base text-red-600">
               {message}
             </p>
           )}
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] w-[calc(100%-2rem)] max-w-sm">
+          <div className="bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
+
+            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-green-500 text-sm shrink-0">
+              ✓
+            </span>
+
+            <p className="text-sm sm:text-base font-medium">
+              {toast}
+            </p>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }
