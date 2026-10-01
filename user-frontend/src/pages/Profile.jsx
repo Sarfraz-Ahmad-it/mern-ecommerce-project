@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import axios from "axios";
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 function Profile() {
+  const { logout } = useAuth();
+  const navigate = useNavigate();
+
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
@@ -27,7 +32,6 @@ function Profile() {
 
         setUser(response.data.user);
       } catch (error) {
-
         setMessage(
           error.response?.data?.message ||
             "Failed to fetch profile"
@@ -39,6 +43,11 @@ function Profile() {
 
     fetchProfile();
   }, []);
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   if (loading) {
     return (
@@ -75,13 +84,16 @@ function Profile() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-100 px-4 py-8 sm:px-6 sm:py-12">
+    <div className="min-h-screen bg-gray-200 px-4 py-8 sm:px-6 sm:py-12">
       <div className="w-full max-w-md mx-auto bg-white rounded-xl shadow-md p-5 sm:p-8">
+
+        {/* Heading */}
         <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 text-center mb-6 sm:mb-8">
           My Profile
         </h1>
 
         <div className="space-y-5">
+
           {/* Name */}
           <div>
             <p className="text-sm text-gray-500 mb-1">
@@ -103,7 +115,17 @@ function Profile() {
               {user.email}
             </p>
           </div>
+
         </div>
+
+        {/* Logout */}
+        <button
+          onClick={handleLogout}
+          className="w-full mt-8 bg-red-600 text-white py-3 rounded-lg font-medium hover:bg-red-700 transition"
+        >
+          Logout
+        </button>
+
       </div>
     </div>
   );
