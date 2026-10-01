@@ -55,7 +55,7 @@ const addToCart = async (req, res) => {
       await cart.populate("items.product");
 
       return res.status(201).json({
-        message: "Product added to cart",
+        message: "Item added to cart",
         cart,
       });
     }
@@ -88,7 +88,7 @@ const addToCart = async (req, res) => {
     await cart.populate("items.product");
 
     res.status(200).json({
-      message: "Product added to cart",
+      message: "Item added to cart",
       cart,
     });
   } catch (error) {
@@ -179,7 +179,7 @@ const updateCartQuantity = async (req, res) => {
 
     if (!cartItem) {
       return res.status(404).json({
-        message: "Product is not in the cart",
+        message: "Item is not in the cart",
       });
     }
 

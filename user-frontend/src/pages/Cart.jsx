@@ -13,6 +13,7 @@ function Cart() {
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
   const [message, setMessage] = useState("");
+  const [toast, setToast] = useState("");
   const [updatingProduct, setUpdatingProduct] = useState(null);
   const [clearingCart, setClearingCart] = useState(false);
 
@@ -74,6 +75,14 @@ function Cart() {
 
       setCart(data.cart);
       updateCartState(data.cart);
+
+      // Show toast
+      setToast("Item removed from cart");
+
+      // Hide toast after 2.5 seconds
+      setTimeout(() => {
+        setToast("");
+      }, 2500);
     } catch (error) {
       setMessage(
         error.response?.data?.message ||
@@ -85,23 +94,31 @@ function Cart() {
   };
 
   const handleClearCart = async () => {
-    try {
-      setClearingCart(true);
-      setMessage("");
+  try {
+    setClearingCart(true);
+    setMessage("");
 
-      const data = await clearCart();
+    const data = await clearCart();
 
-      setCart(data.cart);
-      updateCartState(data.cart);
-    } catch (error) {
-      setMessage(
-        error.response?.data?.message ||
-          "Failed to clear cart"
-      );
-    } finally {
-      setClearingCart(false);
-    }
-  };
+    setCart(data.cart);
+    updateCartState(data.cart);
+
+    // Show toast
+    setToast("Cart cleared");
+
+    // Hide toast after 2.5 seconds
+    setTimeout(() => {
+      setToast("");
+    }, 2500);
+  } catch (error) {
+    setMessage(
+      error.response?.data?.message ||
+        "Failed to clear cart"
+    );
+  } finally {
+    setClearingCart(false);
+  }
+};
 
   if (loading) {
     return (
@@ -124,20 +141,39 @@ function Cart() {
   }
 
   if (!cart || cart.items.length === 0) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
-        <div className="text-center">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-            Your Cart is Empty
-          </h1>
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 relative">
 
-          <p className="text-gray-600">
-            Add some products to your cart.
-          </p>
-        </div>
+      <div className="text-center">
+        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+          Your Cart is Empty
+        </h1>
+
+        <p className="text-gray-600">
+          Add some products to your cart.
+        </p>
       </div>
-    );
-  }
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] w-[calc(100%-2rem)] max-w-sm">
+          <div className="bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
+
+            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-green-500 text-sm shrink-0">
+              ✓
+            </span>
+
+            <p className="text-sm sm:text-base font-medium">
+              {toast}
+            </p>
+
+          </div>
+        </div>
+      )}
+
+    </div>
+  );
+}
 
   const totalAmount = cart.items.reduce(
     (total, item) =>
@@ -166,7 +202,7 @@ function Cart() {
           </button>
         </div>
 
-        {/* Message */}
+        {/* Error Message */}
         {message && (
           <p className="text-red-600 text-sm mb-4">
             {message}
@@ -280,56 +316,73 @@ function Cart() {
           </div>
 
           {/* Cart Summary */}
-    <div className="lg:col-span-1">
+          <div className="lg:col-span-1">
 
-  {/* Mobile Summary */}
-  <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t shadow-lg p-4 lg:hidden">
-    <div className="flex items-center justify-between">
-      <div>
-        <p className="text-sm text-gray-600">
-          Total
-        </p>
+            {/* Mobile Summary */}
+            <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t shadow-lg p-4 lg:hidden">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">
+                    Total
+                  </p>
 
-        <p className="text-xl font-bold text-green-600">
-          ₹ {totalAmount}
-        </p>
-      </div>
+                  <p className="text-xl font-bold text-green-600">
+                    ₹ {totalAmount}
+                  </p>
+                </div>
 
-      <button
-        className="bg-green-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-green-700"
-      >
-        Checkout
-      </button>
-    </div>
-  </div>
+                <button
+                  className="bg-green-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-green-700"
+                >
+                  Checkout
+                </button>
+              </div>
+            </div>
 
-  {/* Desktop Summary */}
-  <div className="hidden lg:block bg-white rounded-xl shadow-sm p-5 sm:p-6 sticky top-20">
-    <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-5">
-      Order Summary
-    </h2>
+            {/* Desktop Summary */}
+            <div className="hidden lg:block bg-white rounded-xl shadow-sm p-5 sm:p-6 sticky top-20">
+              <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-5">
+                Order Summary
+              </h2>
 
-    <div className="flex justify-between items-center border-t pt-4">
-      <span className="text-gray-700 font-medium">
-        Total
-      </span>
+              <div className="flex justify-between items-center border-t pt-4">
+                <span className="text-gray-700 font-medium">
+                  Total
+                </span>
 
-      <span className="text-xl sm:text-2xl font-bold text-green-600">
-        ₹ {totalAmount}
-      </span>
-    </div>
+                <span className="text-xl sm:text-2xl font-bold text-green-600">
+                  ₹ {totalAmount}
+                </span>
+              </div>
 
-    <button
-      className="w-full mt-5 bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700"
-    >
-      Checkout
-    </button>
-  </div>
+              <button
+                className="w-full mt-5 bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700"
+              >
+                Checkout
+              </button>
+            </div>
 
-</div>
-
+          </div>
         </div>
       </div>
+
+      {/* Toast Notification */}
+      {toast && (
+        <div className="fixed bottom-24 sm:bottom-6 left-1/2 -translate-x-1/2 z-[60] w-[calc(100%-2rem)] max-w-sm">
+          <div className="bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
+
+            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-green-500 text-sm shrink-0">
+              ✓
+            </span>
+
+            <p className="text-sm sm:text-base font-medium">
+              {toast}
+            </p>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }
