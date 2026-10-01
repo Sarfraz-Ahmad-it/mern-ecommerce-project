@@ -37,10 +37,10 @@ function Login() {
       );
 
       // Update AuthContext
-            login(
-                response.data.token,
-                response.data.user
-               );
+      login(
+        response.data.token,
+        response.data.user
+      );
 
       // Return to the page user came from
       const redirectTo =
@@ -56,12 +56,28 @@ function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-gray-300 px-4">
       <div className="w-full max-w-md bg-white p-6 sm:p-8 rounded-lg shadow">
 
-        <h1 className="text-2xl font-bold text-center mb-6">
-          Login
-        </h1>
+        {/* Heading */}
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+            Login
+          </h1>
+
+          <p className="mt-2 text-sm sm:text-base text-gray-500">
+            Login to your account to continue
+          </p>
+        </div>
+
+        
+
+        {/* Login Required Message */}
+        {location.state?.loginRequired && (
+          <div className="mb-5 rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-red-700 text-center">
+            Please log in to add products to your cart.
+          </div>
+        )}
 
         <form
           onSubmit={handleSubmit}
@@ -96,7 +112,7 @@ function Login() {
         </form>
 
         {message && (
-          <p className="text-center mt-4">
+          <p className="text-center mt-4 text-red-600">
             {message}
           </p>
         )}
@@ -108,6 +124,7 @@ function Login() {
             to="/register"
             state={{
               from: location.state?.from || "/",
+              loginRequired: location.state?.loginRequired,
             }}
             className="font-semibold text-black hover:underline"
           >
