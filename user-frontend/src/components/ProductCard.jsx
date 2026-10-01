@@ -1,37 +1,33 @@
 import { Link } from "react-router-dom";
+
 function ProductCard({ product }) {
   return (
-    <div className="border rounded-lg shadow-md p-4 hover:shadow-xl transition duration-300">
-      <img
-        src={product.image}
-        alt={product.name}
-        className="w-full h-52 object-cover rounded-md"
-      />
+    <div className="shadow-md p-4 hover:shadow-xl transition duration-300">
 
-      <h2 className="text-xl font-bold mt-3">
-        {product.name}
-      </h2>
+      {/* Product Image */}
+      <Link to={`/products/${product._id}`}>
+        <img
+          src={product.image}
+          alt={product.name}
+          className="w-full h-52 object-cover rounded-md cursor-pointer"
+        />
+      </Link>
 
-      <p className="text-gray-600 mt-2">
-        {product.description}
-      </p>
+      {/* Product Name */}
+      <Link to={`/products/${product._id}`}>
+        <h2 className="text-xl font-bold mt-3 hover:text-blue-600 transition">
+          {product.name}
+        </h2>
+      </Link>
 
-      <h3 className="text-green-600 text-lg font-semibold mt-3">
-        ₹ {product.price}
-      </h3>
+      {/* Price */}
+      <Link to={`/products/${product._id}`}>
+        <h3 className="text-green-600 text-lg font-semibold mt-3 hover:text-green-700 transition">
+          ₹ {product.price}
+        </h3>
+      </Link>
 
-      <p className="mt-2">
-        <strong>Category:</strong> {product.category}
-      </p>
-
-      <p className="mb-4">
-        <strong>Stock:</strong> {product.stock}
-      </p>
-
-        <Link to={`/products/${product._id}`} className="block w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 text-center">
-          View Details
-        </Link>
-    </div>      
+    </div>
   );
 }
 
