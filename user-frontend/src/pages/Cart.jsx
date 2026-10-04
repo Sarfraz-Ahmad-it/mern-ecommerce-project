@@ -6,9 +6,11 @@ import {
   clearCart,
 } from "../services/cartService";
 import { useCart } from "../context/CartContext";
+import { useNavigate } from "react-router-dom";
 
 function Cart() {
   const { updateCartState } = useCart();
+  const navigate = useNavigate();
 
   const [cart, setCart] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -332,7 +334,9 @@ function Cart() {
                 </div>
 
                 <button
-                  className="bg-green-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-green-700"
+                  onClick={() => navigate("/checkout")}
+                  disabled={!cart?.items?.length}
+                  className="bg-green-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   Checkout
                 </button>
@@ -356,7 +360,9 @@ function Cart() {
               </div>
 
               <button
-                className="w-full mt-5 bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700"
+                onClick={() => navigate("/checkout")}
+                disabled={!cart?.items?.length}
+                className="w-full mt-5 bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 Checkout
               </button>
