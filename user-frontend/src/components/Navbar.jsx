@@ -74,8 +74,17 @@ function Navbar() {
       </span>
     )}
   </Link>
+
+  
 )}
 
+{/* Orders */}
+    <Link
+      to="/orders"
+      className="hover:text-gray-200"
+    >
+      Orders
+    </Link>
           {/* Authentication */}
           {isAuthenticated ? (
             <>
