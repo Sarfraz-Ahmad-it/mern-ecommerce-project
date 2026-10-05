@@ -4,9 +4,23 @@ const Product = require("../models/Product");
 
 const createOrder = async (req, res) => {
   try {
-    const { shippingAddress } = req.body;
+    const { items, shippingAddress, source } = req.body;
 
-    // Check shipping address
+    // Validate source
+    if (!source || !["cart", "buyNow"].includes(source)) {
+      return res.status(400).json({
+        message: "Invalid order source",
+      });
+    }
+
+    // Validate items
+    if (!Array.isArray(items) || items.length === 0) {
+      return res.status(400).json({
+        message: "At least one product is required",
+      });
+    }
+
+    // Validate shipping address
     if (
       !shippingAddress ||
       !shippingAddress.name ||
@@ -21,7 +35,76 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // Find user's cart
+    /*
+      ------------------------------------------------
+      BUY NOW
+      ------------------------------------------------
+      Buy Now does not use the cart.
+    */
+
+    if (source === "buyNow") {
+      const orderProducts = [];
+      let totalAmount = 0;
+
+      for (const item of items) {
+        if (!item.productId || !Number.isInteger(item.quantity) || item.quantity < 1) {
+          return res.status(400).json({
+            message: "Invalid product or quantity",
+          });
+        }
+
+        const product = await Product.findById(item.productId);
+
+        if (!product) {
+          return res.status(404).json({
+            message: "Product not found",
+          });
+        }
+
+        if (product.stock < item.quantity) {
+          return res.status(400).json({
+            message: `Insufficient stock for ${product.name}`,
+          });
+        }
+
+        orderProducts.push({
+          product: product._id,
+          quantity: item.quantity,
+          price: product.price,
+        });
+
+        totalAmount += product.price * item.quantity;
+      }
+
+      const order = await Order.create({
+        user: req.userId,
+        products: orderProducts,
+        totalAmount,
+        shippingAddress,
+        paymentStatus: "Pending",
+        orderStatus: "Pending",
+      });
+
+      // Reduce stock
+      for (const item of orderProducts) {
+        await Product.findByIdAndUpdate(item.product, {
+          $inc: { stock: -item.quantity },
+        });
+      }
+
+      return res.status(201).json({
+        message: "Order created successfully",
+        order,
+      });
+    }
+
+    /*
+      ------------------------------------------------
+      CART CHECKOUT
+      ------------------------------------------------
+      Only selected cart items will be ordered.
+    */
+
     const cart = await Cart.findOne({
       user: req.userId,
     }).populate("items.product");
@@ -32,33 +115,48 @@ const createOrder = async (req, res) => {
       });
     }
 
-    // Validate products and stock
-    for (const item of cart.items) {
-      if (!item.product) {
-        return res.status(404).json({
-          message: "Product not found",
-        });
-      }
+    const orderProducts = [];
+    let totalAmount = 0;
 
-      if (item.product.stock < item.quantity) {
+    for (const item of items) {
+      if (!item.productId || !Number.isInteger(item.quantity) || item.quantity < 1) {
         return res.status(400).json({
-          message: `Insufficient stock for ${item.product.name}`,
+          message: "Invalid product or quantity",
         });
       }
+
+      const cartItem = cart.items.find(
+        (cartItem) =>
+          cartItem.product &&
+          cartItem.product._id.toString() === item.productId.toString()
+      );
+
+      if (!cartItem) {
+        return res.status(400).json({
+          message: "Selected product is not in the cart",
+        });
+      }
+
+      if (item.quantity > cartItem.quantity) {
+        return res.status(400).json({
+          message: `You cannot order more than ${cartItem.quantity} quantity of ${cartItem.product.name}`,
+        });
+      }
+
+      if (cartItem.product.stock < item.quantity) {
+        return res.status(400).json({
+          message: `Insufficient stock for ${cartItem.product.name}`,
+        });
+      }
+
+      orderProducts.push({
+        product: cartItem.product._id,
+        quantity: item.quantity,
+        price: cartItem.product.price,
+      });
+
+      totalAmount += cartItem.product.price * item.quantity;
     }
-
-    // Prepare order products
-    const orderProducts = cart.items.map((item) => ({
-      product: item.product._id,
-      quantity: item.quantity,
-      price: item.product.price,
-    }));
-
-    // Calculate total amount
-    const totalAmount = cart.items.reduce(
-      (total, item) => total + item.product.price * item.quantity,
-      0
-    );
 
     // Create order
     const order = await Order.create({
@@ -71,24 +169,41 @@ const createOrder = async (req, res) => {
     });
 
     // Reduce product stock
-    for (const item of cart.items) {
-      await Product.findByIdAndUpdate(item.product._id, {
-        $inc: {
-          stock: -item.quantity,
-        },
+    for (const item of orderProducts) {
+      await Product.findByIdAndUpdate(item.product, {
+        $inc: { stock: -item.quantity },
       });
     }
 
-    // Clear cart
-    cart.items = [];
+    // Remove/update ONLY the ordered items from cart
+    for (const item of items) {
+      const cartItemIndex = cart.items.findIndex(
+        (cartItem) =>
+          cartItem.product &&
+          cartItem.product._id.toString() === item.productId.toString()
+      );
+
+      if (cartItemIndex === -1) continue;
+
+      const cartItem = cart.items[cartItemIndex];
+
+      if (item.quantity === cartItem.quantity) {
+        cart.items.splice(cartItemIndex, 1);
+      } else {
+        cartItem.quantity -= item.quantity;
+      }
+    }
+
     await cart.save();
 
-    // Return created order
-    res.status(201).json({
+    return res.status(201).json({
       message: "Order created successfully",
       order,
+      cart,
     });
   } catch (error) {
+    console.error("Create order error:", error);
+
     res.status(500).json({
       message: "Server error",
       error: error.message,
