@@ -6,7 +6,7 @@ import {
   clearCart,
 } from "../services/cartService";
 import { useCart } from "../context/CartContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 function Cart() {
   const { updateCartState } = useCart();
@@ -19,6 +19,9 @@ function Cart() {
   const [updatingProduct, setUpdatingProduct] = useState(null);
   const [clearingCart, setClearingCart] = useState(false);
 
+  // Selected product IDs
+  const [selectedItems, setSelectedItems] = useState([]);
+
   useEffect(() => {
     const fetchCart = async () => {
       try {
@@ -26,10 +29,12 @@ function Cart() {
 
         setCart(data.cart);
         updateCartState(data.cart);
+
+        // No products selected by default
+        setSelectedItems([]);
       } catch (error) {
         setMessage(
-          error.response?.data?.message ||
-            "Failed to fetch cart"
+          error.response?.data?.message || "Failed to fetch cart"
         );
       } finally {
         setLoading(false);
@@ -39,10 +44,29 @@ function Cart() {
     fetchCart();
   }, []);
 
-  const handleQuantityChange = async (
-    productId,
-    quantity
-  ) => {
+  // Select / unselect one product
+  const handleSelectItem = (productId) => {
+    setSelectedItems((prev) =>
+      prev.includes(productId)
+        ? prev.filter((id) => id !== productId)
+        : [...prev, productId]
+    );
+  };
+
+  // Select / unselect all products
+  const handleSelectAll = () => {
+    if (!cart?.items?.length) return;
+
+    if (selectedItems.length === cart.items.length) {
+      setSelectedItems([]);
+    } else {
+      setSelectedItems(
+        cart.items.map((item) => item.product?._id)
+      );
+    }
+  };
+
+  const handleQuantityChange = async (productId, quantity) => {
     if (quantity < 1) {
       return;
     }
@@ -51,10 +75,7 @@ function Cart() {
       setUpdatingProduct(productId);
       setMessage("");
 
-      const data = await updateCartQuantity(
-        productId,
-        quantity
-      );
+      const data = await updateCartQuantity(productId, quantity);
 
       setCart(data.cart);
       updateCartState(data.cart);
@@ -78,6 +99,11 @@ function Cart() {
       setCart(data.cart);
       updateCartState(data.cart);
 
+      // Remove deleted product from selected items
+      setSelectedItems((prev) =>
+        prev.filter((id) => id !== productId)
+      );
+
       // Show toast
       setToast("Item removed from cart");
 
@@ -96,31 +122,73 @@ function Cart() {
   };
 
   const handleClearCart = async () => {
-  try {
-    setClearingCart(true);
-    setMessage("");
+    try {
+      setClearingCart(true);
+      setMessage("");
 
-    const data = await clearCart();
+      const data = await clearCart();
 
-    setCart(data.cart);
-    updateCartState(data.cart);
+      setCart(data.cart);
+      updateCartState(data.cart);
 
-    // Show toast
-    setToast("Cart cleared");
+      // Clear selected items
+      setSelectedItems([]);
 
-    // Hide toast after 2.5 seconds
-    setTimeout(() => {
-      setToast("");
-    }, 2500);
-  } catch (error) {
-    setMessage(
-      error.response?.data?.message ||
-        "Failed to clear cart"
-    );
-  } finally {
-    setClearingCart(false);
-  }
-};
+      // Show toast
+      setToast("Cart cleared");
+
+      // Hide toast after 2.5 seconds
+      setTimeout(() => {
+        setToast("");
+      }, 2500);
+    } catch (error) {
+      setMessage(
+        error.response?.data?.message ||
+          "Failed to clear cart"
+      );
+    } finally {
+      setClearingCart(false);
+    }
+  };
+
+  // Selected cart items
+  const selectedCartItems =
+    cart?.items?.filter((item) =>
+      selectedItems.includes(item.product?._id)
+    ) || [];
+
+  // Total of selected products only
+  const totalAmount = selectedCartItems.reduce(
+    (total, item) =>
+      total + item.product.price * item.quantity,
+    0
+  );
+
+  // Total quantity of selected products
+  const totalItems = selectedCartItems.reduce(
+    (total, item) => total + item.quantity,
+    0
+  );
+
+  // Checkout selected products
+  const handleCheckout = () => {
+    if (selectedCartItems.length === 0) {
+      setMessage("Please select at least one product");
+      return;
+    }
+
+    const items = selectedCartItems.map((item) => ({
+      productId: item.product._id,
+      quantity: item.quantity,
+    }));
+
+    navigate("/checkout", {
+      state: {
+        source: "cart",
+        items,
+      },
+    });
+  };
 
   if (loading) {
     return (
@@ -143,45 +211,38 @@ function Cart() {
   }
 
   if (!cart || cart.items.length === 0) {
-  return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 relative">
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4 relative">
+        <div className="text-center">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
+            Your Cart is Empty
+          </h1>
 
-      <div className="text-center">
-        <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-3">
-          Your Cart is Empty
-        </h1>
-
-        <p className="text-gray-600">
-          Add some products to your cart.
-        </p>
-      </div>
-
-      {/* Toast Notification */}
-      {toast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] w-[calc(100%-2rem)] max-w-sm">
-          <div className="bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
-
-            <span className="flex items-center justify-center w-6 h-6 rounded-full bg-green-500 text-sm shrink-0">
-              ✓
-            </span>
-
-            <p className="text-sm sm:text-base font-medium">
-              {toast}
-            </p>
-
-          </div>
+          <p className="text-gray-600">
+            Add some products to your cart.
+          </p>
         </div>
-      )}
 
-    </div>
-  );
-}
+        {/* Toast Notification */}
+        {toast && (
+          <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[60] w-[calc(100%-2rem)] max-w-sm">
+            <div className="bg-gray-900 text-white px-4 py-3 rounded-lg shadow-lg flex items-center gap-3">
+              <span className="flex items-center justify-center w-6 h-6 rounded-full bg-green-500 text-sm shrink-0">
+                ✓
+              </span>
 
-  const totalAmount = cart.items.reduce(
-    (total, item) =>
-      total + item.product.price * item.quantity,
-    0
-  );
+              <p className="text-sm sm:text-base font-medium">
+                {toast}
+              </p>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  const allSelected =
+    selectedItems.length === cart.items.length;
 
   return (
     <div className="min-h-screen bg-gray-100 px-4 py-6 sm:px-6 sm:py-10">
@@ -189,9 +250,15 @@ function Cart() {
 
         {/* Header */}
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
-          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
-            My Cart
-          </h1>
+          <div>
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900">
+              My Cart
+            </h1>
+
+            <p className="text-sm text-gray-600 mt-1">
+              {selectedCartItems.length} of {cart.items.length} products selected
+            </p>
+          </div>
 
           <button
             onClick={handleClearCart}
@@ -211,38 +278,87 @@ function Cart() {
           </p>
         )}
 
+        {/* Select All */}
+        <div className="bg-white rounded-xl shadow-sm p-4 mb-4">
+          <label className="flex items-center gap-3 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={allSelected}
+              onChange={handleSelectAll}
+              className="w-5 h-5 accent-blue-600 cursor-pointer"
+            />
+
+            <span className="font-medium text-gray-900">
+              Select All
+            </span>
+
+            <span className="text-sm text-gray-500">
+              ({cart.items.length} products)
+            </span>
+          </label>
+        </div>
+
         {/* Main Cart Layout */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
 
           {/* Cart Items */}
           <div className="lg:col-span-2 space-y-4">
-
             {cart.items.map((item) => {
               const productId = item.product._id;
 
               const isUpdating =
                 updatingProduct === productId;
 
+              const isSelected =
+                selectedItems.includes(productId);
+
               return (
                 <div
                   key={productId}
-                  className="bg-white rounded-xl shadow-sm p-4 sm:p-5"
+                  className={`bg-white rounded-xl shadow-sm p-4 sm:p-5 transition ${
+                    isSelected
+                      ? "ring-2 ring-blue-500"
+                      : ""
+                  }`}
                 >
                   <div className="flex flex-col sm:flex-row gap-4">
 
-                    {/* Product Image */}
-                    <img
-                      src={item.product.image}
-                      alt={item.product.name}
-                      className="w-full sm:w-28 h-48 sm:h-28 object-cover rounded-lg"
-                    />
+                    {/* Selection + Product Image */}
+                    <div className="flex items-start gap-3">
+                      <input
+                        type="checkbox"
+                        checked={isSelected}
+                        onChange={() =>
+                          handleSelectItem(productId)
+                        }
+                        className="w-5 h-5 mt-1 accent-blue-600 cursor-pointer shrink-0"
+                      />
+
+                      {/* Clickable Product Image */}
+                      <Link
+                        to={`/products/${productId}`}
+                        className="shrink-0"
+                      >
+                        <img
+                          src={item.product.image}
+                          alt={item.product.name}
+                          className="w-full sm:w-28 h-48 sm:h-28 object-cover rounded-lg hover:opacity-90 transition cursor-pointer"
+                        />
+                      </Link>
+                    </div>
 
                     {/* Product Information */}
                     <div className="flex-1">
 
-                      <h2 className="text-lg sm:text-xl font-semibold text-gray-900">
-                        {item.product.name}
-                      </h2>
+                      {/* Clickable Product Name */}
+                      <Link
+                        to={`/products/${productId}`}
+                        className="inline-block"
+                      >
+                        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 hover:text-blue-600 transition">
+                          {item.product.name}
+                        </h2>
+                      </Link>
 
                       <p className="text-gray-600 mt-1">
                         ₹ {item.product.price}
@@ -322,32 +438,64 @@ function Cart() {
 
             {/* Mobile Summary */}
             <div className="fixed bottom-0 left-0 right-0 z-50 bg-white border-t shadow-lg p-4 lg:hidden">
-              <div className="flex items-center justify-between">
+              <div className="flex items-center justify-between gap-4">
+
                 <div>
                   <p className="text-sm text-gray-600">
-                    Total
+                    Selected Total
                   </p>
 
                   <p className="text-xl font-bold text-green-600">
                     ₹ {totalAmount}
                   </p>
+
+                  <p className="text-xs text-gray-500 mt-1">
+                    {totalItems} item
+                    {totalItems !== 1 ? "s" : ""}
+                  </p>
                 </div>
 
                 <button
-                  onClick={() => navigate("/checkout")}
-                  disabled={!cart?.items?.length}
+                  onClick={handleCheckout}
+                  disabled={selectedCartItems.length === 0}
                   className="bg-green-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
                   Checkout
                 </button>
+
               </div>
             </div>
 
             {/* Desktop Summary */}
             <div className="hidden lg:block bg-white rounded-xl shadow-sm p-5 sm:p-6 sticky top-20">
+
               <h2 className="text-lg sm:text-xl font-semibold text-gray-900 mb-5">
                 Order Summary
               </h2>
+
+              <div className="space-y-2 mb-4">
+
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">
+                    Selected Products
+                  </span>
+
+                  <span className="font-medium">
+                    {selectedCartItems.length}
+                  </span>
+                </div>
+
+                <div className="flex justify-between text-sm">
+                  <span className="text-gray-600">
+                    Total Items
+                  </span>
+
+                  <span className="font-medium">
+                    {totalItems}
+                  </span>
+                </div>
+
+              </div>
 
               <div className="flex justify-between items-center border-t pt-4">
                 <span className="text-gray-700 font-medium">
@@ -360,14 +508,14 @@ function Cart() {
               </div>
 
               <button
-                onClick={() => navigate("/checkout")}
-                disabled={!cart?.items?.length}
+                onClick={handleCheckout}
+                disabled={selectedCartItems.length === 0}
                 className="w-full mt-5 bg-green-600 text-white py-3 rounded-lg font-medium hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
               >
                 Checkout
               </button>
-            </div>
 
+            </div>
           </div>
         </div>
       </div>
