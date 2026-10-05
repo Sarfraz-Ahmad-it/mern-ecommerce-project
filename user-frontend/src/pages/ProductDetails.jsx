@@ -85,7 +85,7 @@ function ProductDetails() {
       setLoading(true);
       setMessage("");
 
-      const data = await addToCart(
+      await addToCart(
         product._id,
         quantity
       );
@@ -107,6 +107,34 @@ function ProductDetails() {
     } finally {
       setLoading(false);
     }
+  };
+
+  // Buy Now
+  const handleBuyNow = () => {
+    const token = localStorage.getItem("token");
+
+    if (!token) {
+      navigate("/login", {
+        state: {
+          from: `/products/${id}`,
+          loginRequired: true,
+        },
+      });
+
+      return;
+    }
+
+    navigate("/checkout", {
+      state: {
+        source: "buyNow",
+        items: [
+          {
+            productId: product._id,
+            quantity,
+          },
+        ],
+      },
+    });
   };
 
   if (!product) {
@@ -187,7 +215,8 @@ function ProductDetails() {
                     )
                   )
                 }
-                className="w-10 h-10 bg-gray-200 rounded-lg text-lg font-bold hover:bg-gray-300"
+                disabled={product.stock === 0}
+                className="w-10 h-10 bg-gray-200 rounded-lg text-lg font-bold hover:bg-gray-300 disabled:opacity-50 disabled:cursor-not-allowed"
               >
                 +
               </button>
@@ -197,27 +226,31 @@ function ProductDetails() {
           {/* Buttons */}
           <div className="flex flex-col sm:flex-row gap-3">
 
+            {/* Add to Cart */}
             <button
-                onClick={handleAddToCart}
-                disabled={
-                  loading ||
-                  product.stock === 0
-                }
-                className={`w-full sm:w-auto px-6 py-3 rounded-lg font-medium transition ${
-                  inCart
-                    ? "bg-blue-600 text-white hover:bg-blue-700"
-                    : "bg-white text-black border border-black hover:bg-gray-100"
-                } disabled:bg-gray-400 disabled:text-white disabled:border-gray-400 disabled:cursor-not-allowed`}
-              >
-                {loading
-                  ? "Adding..."
-                  : inCart
-                  ? "Go to Cart"
-                  : "Add to Cart"}
+              onClick={handleAddToCart}
+              disabled={
+                loading ||
+                product.stock === 0
+              }
+              className={`w-full sm:w-auto px-6 py-3 rounded-lg font-medium transition ${
+                inCart
+                  ? "bg-blue-600 text-white hover:bg-blue-700"
+                  : "bg-white text-black border border-black hover:bg-gray-100"
+              } disabled:bg-gray-400 disabled:text-white disabled:border-gray-400 disabled:cursor-not-allowed`}
+            >
+              {loading
+                ? "Adding..."
+                : inCart
+                ? "Go to Cart"
+                : "Add to Cart"}
             </button>
 
+            {/* Buy Now */}
             <button
-              className="w-full sm:w-auto bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700"
+              onClick={handleBuyNow}
+              disabled={product.stock === 0}
+              className="w-full sm:w-auto bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 disabled:bg-gray-400 disabled:cursor-not-allowed"
             >
               Buy Now
             </button>
