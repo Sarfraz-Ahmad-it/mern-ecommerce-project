@@ -2,13 +2,19 @@ import axios from "axios";
 
 const API_URL = "http://localhost:5001/api/orders";
 
-export const createOrder = async (shippingAddress) => {
+export const createOrder = async ({
+  items,
+  shippingAddress,
+  source,
+}) => {
   const token = localStorage.getItem("token");
 
   const response = await axios.post(
     API_URL,
     {
+      items,
       shippingAddress,
+      source,
     },
     {
       headers: {
@@ -56,7 +62,7 @@ export const cancelOrder = async (orderId) => {
     {
       headers: {
         Authorization: `Bearer ${token}`,
-      },
+      }, 
     }
   );
 
