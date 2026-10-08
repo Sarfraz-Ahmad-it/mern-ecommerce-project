@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Product = require("../models/Product");
 
 const getAllProducts = async (req, res) => {
@@ -9,16 +10,26 @@ const getAllProducts = async (req, res) => {
       products,
     });
   } catch (error) {
+    console.error("Get all products error:", error);
+
     res.status(500).json({
       message: "Server error",
-      error: error.message,
     });
   }
 };
 
 const getProductById = async (req, res) => {
   try {
-    const product = await Product.findById(req.params.id);
+    const { id } = req.params;
+
+    // Validate product ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid product ID",
+      });
+    }
+
+    const product = await Product.findById(id);
 
     if (!product) {
       return res.status(404).json({
@@ -31,11 +42,15 @@ const getProductById = async (req, res) => {
       product,
     });
   } catch (error) {
+    console.error("Get product by ID error:", error);
+
     res.status(500).json({
       message: "Server error",
-      error: error.message,
     });
   }
 };
 
-module.exports = { getAllProducts, getProductById };
+module.exports = {
+  getAllProducts,
+  getProductById,
+};
