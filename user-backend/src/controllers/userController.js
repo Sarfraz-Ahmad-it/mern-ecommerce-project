@@ -15,9 +15,10 @@ const getUserProfile = async (req, res) => {
       user,
     });
   } catch (error) {
+    console.error("Get user profile error:", error);
+
     res.status(500).json({
       message: "Server error",
-      error: error.message,
     });
   }
 };
@@ -33,9 +34,29 @@ const updateUserProfile = async (req, res) => {
       });
     }
 
+    // Normalize input
+    const normalizedName = name.trim();
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Validate name
+    if (!normalizedName) {
+      return res.status(400).json({
+        message: "Name cannot be empty",
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(normalizedEmail)) {
+      return res.status(400).json({
+        message: "Please enter a valid email address",
+      });
+    }
+
     // Check if another user is already using this email
     const existingUser = await User.findOne({
-      email,
+      email: normalizedEmail,
       _id: { $ne: req.userId },
     });
 
@@ -49,8 +70,8 @@ const updateUserProfile = async (req, res) => {
     const user = await User.findByIdAndUpdate(
       req.userId,
       {
-        name,
-        email,
+        name: normalizedName,
+        email: normalizedEmail,
       },
       {
         new: true,
@@ -69,9 +90,10 @@ const updateUserProfile = async (req, res) => {
       user,
     });
   } catch (error) {
+    console.error("Update user profile error:", error);
+
     res.status(500).json({
       message: "Server error",
-      error: error.message,
     });
   }
 };
