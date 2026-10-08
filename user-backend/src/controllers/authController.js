@@ -13,8 +13,37 @@ const registerUser = async (req, res) => {
       });
     }
 
+    // Normalize input
+    const normalizedName = name.trim();
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Validate name
+    if (!normalizedName) {
+      return res.status(400).json({
+        message: "Name cannot be empty",
+      });
+    }
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(normalizedEmail)) {
+      return res.status(400).json({
+        message: "Please enter a valid email address",
+      });
+    }
+
+    // Validate password length
+    if (password.length < 6) {
+      return res.status(400).json({
+        message: "Password must be at least 6 characters long",
+      });
+    }
+
     // Check if user already exists
-    const existingUser = await User.findOne({ email });
+    const existingUser = await User.findOne({
+      email: normalizedEmail,
+    });
 
     if (existingUser) {
       return res.status(409).json({
@@ -27,8 +56,8 @@ const registerUser = async (req, res) => {
 
     // Create user
     const user = await User.create({
-      name,
-      email,
+      name: normalizedName,
+      email: normalizedEmail,
       password: hashedPassword,
     });
 
@@ -54,9 +83,10 @@ const registerUser = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("Register error:", error);
+
     res.status(500).json({
       message: "Server error",
-      error: error.message,
     });
   }
 };
@@ -72,8 +102,22 @@ const loginUser = async (req, res) => {
       });
     }
 
+    // Normalize email
+    const normalizedEmail = email.trim().toLowerCase();
+
+    // Validate email format
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+    if (!emailRegex.test(normalizedEmail)) {
+      return res.status(400).json({
+        message: "Please enter a valid email address",
+      });
+    }
+
     // Find user by email
-    const user = await User.findOne({ email });
+    const user = await User.findOne({
+      email: normalizedEmail,
+    });
 
     if (!user) {
       return res.status(401).json({
@@ -115,9 +159,10 @@ const loginUser = async (req, res) => {
       },
     });
   } catch (error) {
+    console.error("Login error:", error);
+
     res.status(500).json({
       message: "Server error",
-      error: error.message,
     });
   }
 };
@@ -137,9 +182,10 @@ const getProfile = async (req, res) => {
       user,
     });
   } catch (error) {
+    console.error("Get profile error:", error);
+
     res.status(500).json({
       message: "Server error",
-      error: error.message,
     });
   }
 };
@@ -147,5 +193,5 @@ const getProfile = async (req, res) => {
 module.exports = {
   registerUser,
   loginUser,
-  getProfile, 
+  getProfile,
 };
