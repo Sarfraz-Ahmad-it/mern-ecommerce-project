@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Order = require("../models/Order");
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
@@ -21,18 +22,71 @@ const createOrder = async (req, res) => {
     }
 
     // Validate shipping address
-    if (
-      !shippingAddress ||
-      !shippingAddress.name ||
-      !shippingAddress.phone ||
-      !shippingAddress.address ||
-      !shippingAddress.city ||
-      !shippingAddress.state ||
-      !shippingAddress.pincode
-    ) {
+    if (!shippingAddress || typeof shippingAddress !== "object") {
       return res.status(400).json({
         message: "Complete shipping address is required",
       });
+    }
+
+    const requiredAddressFields = [
+      "name",
+      "phone",
+      "address",
+      "city",
+      "state",
+      "pincode",
+    ];
+
+    for (const field of requiredAddressFields) {
+      if (
+        typeof shippingAddress[field] !== "string" ||
+        !shippingAddress[field].trim()
+      ) {
+        return res.status(400).json({
+          message: "Complete shipping address is required",
+        });
+      }
+    }
+
+    // Clean shipping address
+    const cleanedShippingAddress = {
+      name: shippingAddress.name.trim(),
+      phone: shippingAddress.phone.trim(),
+      address: shippingAddress.address.trim(),
+      city: shippingAddress.city.trim(),
+      state: shippingAddress.state.trim(),
+      pincode: shippingAddress.pincode.trim(),
+    };
+
+    // Check for duplicate products in the same order
+    const productIds = new Set();
+
+    for (const item of items) {
+      if (!item.productId) {
+        return res.status(400).json({
+          message: "Product ID is required",
+        });
+      }
+
+      if (!mongoose.Types.ObjectId.isValid(item.productId)) {
+        return res.status(400).json({
+          message: "Invalid product ID",
+        });
+      }
+
+      if (!Number.isInteger(item.quantity) || item.quantity < 1) {
+        return res.status(400).json({
+          message: "Quantity must be a positive whole number",
+        });
+      }
+
+      if (productIds.has(item.productId.toString())) {
+        return res.status(400).json({
+          message: "Duplicate products are not allowed in one order",
+        });
+      }
+
+      productIds.add(item.productId.toString());
     }
 
     /*
@@ -47,12 +101,6 @@ const createOrder = async (req, res) => {
       let totalAmount = 0;
 
       for (const item of items) {
-        if (!item.productId || !Number.isInteger(item.quantity) || item.quantity < 1) {
-          return res.status(400).json({
-            message: "Invalid product or quantity",
-          });
-        }
-
         const product = await Product.findById(item.productId);
 
         if (!product) {
@@ -80,7 +128,7 @@ const createOrder = async (req, res) => {
         user: req.userId,
         products: orderProducts,
         totalAmount,
-        shippingAddress,
+        shippingAddress: cleanedShippingAddress,
         paymentStatus: "Pending",
         orderStatus: "Pending",
       });
@@ -119,12 +167,6 @@ const createOrder = async (req, res) => {
     let totalAmount = 0;
 
     for (const item of items) {
-      if (!item.productId || !Number.isInteger(item.quantity) || item.quantity < 1) {
-        return res.status(400).json({
-          message: "Invalid product or quantity",
-        });
-      }
-
       const cartItem = cart.items.find(
         (cartItem) =>
           cartItem.product &&
@@ -163,7 +205,7 @@ const createOrder = async (req, res) => {
       user: req.userId,
       products: orderProducts,
       totalAmount,
-      shippingAddress,
+      shippingAddress: cleanedShippingAddress,
       paymentStatus: "Pending",
       orderStatus: "Pending",
     });
@@ -206,7 +248,6 @@ const createOrder = async (req, res) => {
 
     res.status(500).json({
       message: "Server error",
-      error: error.message,
     });
   }
 };
@@ -224,9 +265,10 @@ const getUserOrders = async (req, res) => {
       orders,
     });
   } catch (error) {
+    console.error("Get user orders error:", error);
+
     res.status(500).json({
       message: "Server error",
-      error: error.message,
     });
   }
 };
@@ -234,6 +276,13 @@ const getUserOrders = async (req, res) => {
 const getOrderById = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Validate order ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid order ID",
+      });
+    }
 
     const order = await Order.findOne({
       _id: id,
@@ -251,9 +300,10 @@ const getOrderById = async (req, res) => {
       order,
     });
   } catch (error) {
+    console.error("Get order by ID error:", error);
+
     res.status(500).json({
       message: "Server error",
-      error: error.message,
     });
   }
 };
@@ -261,6 +311,13 @@ const getOrderById = async (req, res) => {
 const cancelOrder = async (req, res) => {
   try {
     const { id } = req.params;
+
+    // Validate order ID
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({
+        message: "Invalid order ID",
+      });
+    }
 
     // Find the order belonging to the logged-in user
     const order = await Order.findOne({
@@ -309,9 +366,10 @@ const cancelOrder = async (req, res) => {
       order,
     });
   } catch (error) {
+    console.error("Cancel order error:", error);
+
     res.status(500).json({
       message: "Server error",
-      error: error.message,
     });
   }
 };
