@@ -1,3 +1,4 @@
+const mongoose = require("mongoose");
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
 
@@ -6,16 +7,23 @@ const addToCart = async (req, res) => {
     const { productId, quantity } = req.body;
 
     // Check required fields
-    if (!productId || !quantity) {
+    if (!productId || quantity === undefined) {
       return res.status(400).json({
         message: "Product ID and quantity are required",
       });
     }
 
-    // Check quantity
-    if (quantity < 1) {
+    // Check product ID format
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(400).json({
-        message: "Quantity must be at least 1",
+        message: "Invalid product ID",
+      });
+    }
+
+    // Check quantity
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      return res.status(400).json({
+        message: "Quantity must be a positive whole number",
       });
     }
 
@@ -36,7 +44,9 @@ const addToCart = async (req, res) => {
     }
 
     // Find user's cart
-    let cart = await Cart.findOne({ user: req.userId });
+    let cart = await Cart.findOne({
+      user: req.userId,
+    });
 
     // Create cart if it doesn't exist
     if (!cart) {
@@ -51,7 +61,6 @@ const addToCart = async (req, res) => {
       });
 
       await cart.save();
-
       await cart.populate("items.product");
 
       return res.status(201).json({
@@ -84,7 +93,6 @@ const addToCart = async (req, res) => {
     }
 
     await cart.save();
-
     await cart.populate("items.product");
 
     res.status(200).json({
@@ -92,9 +100,10 @@ const addToCart = async (req, res) => {
       cart,
     });
   } catch (error) {
+    console.error("Add to cart error:", error);
+
     res.status(500).json({
       message: "Server error",
-      error: error.message,
     });
   }
 };
@@ -119,9 +128,10 @@ const getCart = async (req, res) => {
       cart,
     });
   } catch (error) {
+    console.error("Get cart error:", error);
+
     res.status(500).json({
       message: "Server error",
-      error: error.message,
     });
   }
 };
@@ -138,10 +148,17 @@ const updateCartQuantity = async (req, res) => {
       });
     }
 
-    // Check quantity
-    if (quantity < 1) {
+    // Check product ID format
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
       return res.status(400).json({
-        message: "Quantity must be at least 1",
+        message: "Invalid product ID",
+      });
+    }
+
+    // Check quantity
+    if (!Number.isInteger(quantity) || quantity < 1) {
+      return res.status(400).json({
+        message: "Quantity must be a positive whole number",
       });
     }
 
@@ -196,9 +213,10 @@ const updateCartQuantity = async (req, res) => {
       cart,
     });
   } catch (error) {
+    console.error("Update cart quantity error:", error);
+
     res.status(500).json({
       message: "Server error",
-      error: error.message,
     });
   }
 };
@@ -206,6 +224,13 @@ const updateCartQuantity = async (req, res) => {
 const removeFromCart = async (req, res) => {
   try {
     const { productId } = req.params;
+
+    // Check product ID format
+    if (!mongoose.Types.ObjectId.isValid(productId)) {
+      return res.status(400).json({
+        message: "Invalid product ID",
+      });
+    }
 
     // Find user's cart
     const cart = await Cart.findOne({
@@ -235,7 +260,6 @@ const removeFromCart = async (req, res) => {
     );
 
     await cart.save();
-
     await cart.populate("items.product");
 
     res.status(200).json({
@@ -243,9 +267,10 @@ const removeFromCart = async (req, res) => {
       cart,
     });
   } catch (error) {
+    console.error("Remove from cart error:", error);
+
     res.status(500).json({
       message: "Server error",
-      error: error.message,
     });
   }
 };
@@ -272,9 +297,10 @@ const clearCart = async (req, res) => {
       cart,
     });
   } catch (error) {
+    console.error("Clear cart error:", error);
+
     res.status(500).json({
       message: "Server error",
-      error: error.message,
     });
   }
 };
