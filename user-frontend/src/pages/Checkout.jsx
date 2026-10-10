@@ -230,14 +230,118 @@ function Checkout() {
   */
 
   if (cartLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">
-          Loading checkout...
-        </p>
+  return (
+    <div className="min-h-screen bg-gray-100 px-4 py-6 sm:px-6 sm:py-10">
+      <div className="max-w-6xl mx-auto animate-pulse">
+
+        {/* Heading Skeleton */}
+        <div className="mb-6">
+          <div className="h-8 bg-gray-200 rounded w-32" />
+          <div className="h-4 bg-gray-200 rounded w-40 mt-2" />
+        </div>
+
+        {/* Main Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          {/* Shipping Form Skeleton */}
+          <div className="lg:col-span-2 bg-white rounded-xl shadow-md p-5 sm:p-8">
+            <div className="h-6 bg-gray-200 rounded w-40 mb-6" />
+
+            <div className="space-y-5">
+
+              {/* Name */}
+              <div>
+                <div className="h-4 bg-gray-200 rounded w-20 mb-2" />
+                <div className="h-12 bg-gray-200 rounded-lg w-full" />
+              </div>
+
+              {/* Phone */}
+              <div>
+                <div className="h-4 bg-gray-200 rounded w-28 mb-2" />
+                <div className="h-12 bg-gray-200 rounded-lg w-full" />
+              </div>
+
+              {/* Address */}
+              <div>
+                <div className="h-4 bg-gray-200 rounded w-20 mb-2" />
+                <div className="h-24 bg-gray-200 rounded-lg w-full" />
+              </div>
+
+              {/* City + State */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                <div>
+                  <div className="h-4 bg-gray-200 rounded w-12 mb-2" />
+                  <div className="h-12 bg-gray-200 rounded-lg w-full" />
+                </div>
+
+                <div>
+                  <div className="h-4 bg-gray-200 rounded w-14 mb-2" />
+                  <div className="h-12 bg-gray-200 rounded-lg w-full" />
+                </div>
+              </div>
+
+              {/* Pincode */}
+              <div>
+                <div className="h-4 bg-gray-200 rounded w-16 mb-2" />
+                <div className="h-12 bg-gray-200 rounded-lg w-full" />
+              </div>
+
+              {/* Mobile Place Order */}
+              <div className="h-12 bg-gray-200 rounded-lg lg:hidden" />
+
+            </div>
+          </div>
+
+          {/* Order Summary Skeleton */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-xl shadow-md p-5 sm:p-6">
+
+              <div className="h-6 bg-gray-200 rounded w-32 mb-6" />
+
+              {/* Products */}
+              <div className="space-y-4">
+                {[1, 2].map((item) => (
+                  <div
+                    key={item}
+                    className="flex gap-3"
+                  >
+                    <div className="w-16 h-16 sm:w-20 sm:h-20 bg-gray-200 rounded-lg shrink-0" />
+
+                    <div className="min-w-0 flex-1 space-y-2">
+                      <div className="h-5 bg-gray-200 rounded w-3/4" />
+                      <div className="h-4 bg-gray-200 rounded w-1/2" />
+                      <div className="h-4 bg-gray-200 rounded w-1/3" />
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              {/* Summary */}
+              <div className="border-t mt-5 pt-5 space-y-4">
+
+                <div className="flex justify-between">
+                  <div className="h-4 bg-gray-200 rounded w-24" />
+                  <div className="h-4 bg-gray-200 rounded w-10" />
+                </div>
+
+                <div className="flex justify-between border-t pt-3">
+                  <div className="h-5 bg-gray-200 rounded w-28" />
+                  <div className="h-7 bg-gray-200 rounded w-24" />
+                </div>
+
+              </div>
+
+              {/* Desktop Place Order */}
+              <div className="hidden lg:block h-12 bg-gray-200 rounded-lg mt-6" />
+
+            </div>
+          </div>
+
+        </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   /*
     ------------------------------------------------
