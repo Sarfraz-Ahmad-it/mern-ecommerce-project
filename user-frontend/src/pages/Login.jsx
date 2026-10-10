@@ -19,18 +19,24 @@ function Login() {
   });
 
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+
+    setMessage("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
+      setLoading(true);
+      setMessage("");
+
       const response = await axios.post(
         "http://localhost:5001/api/auth/login",
         formData
@@ -42,16 +48,36 @@ function Login() {
         response.data.user
       );
 
-      // Return to the page user came from
-      const redirectTo =
-        location.state?.from || "/";
+      // Get redirect information
+      const from = location.state?.from || "/";
+      const action = location.state?.action;
 
-      navigate(redirectTo);
+      // Buy Now flow
+      if (action === "buyNow") {
+        const productId = from.split("/").pop();
+
+        navigate("/checkout", {
+          state: {
+            source: "buyNow",
+            items: [
+              {
+                productId,
+                quantity: location.state?.quantity || 1,
+              },
+            ],
+          },
+        });
+      } else {
+        // Normal flow
+        navigate(from);
+      }
     } catch (error) {
       setMessage(
         error.response?.data?.message ||
           "Login failed"
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -70,12 +96,12 @@ function Login() {
           </p>
         </div>
 
-        
-
         {/* Login Required Message */}
         {location.state?.loginRequired && (
           <div className="mb-5 rounded-lg bg-blue-50 border border-blue-200 px-4 py-3 text-sm text-red-700 text-center">
-            Please log in to add products to your cart.
+            {location.state?.action === "buyNow"
+              ? "Please log in to continue with Buy Now."
+              : "Please log in to add products to your cart."}
           </div>
         )}
 
@@ -105,9 +131,10 @@ function Login() {
 
           <button
             type="submit"
-            className="w-full bg-black text-white py-2 rounded hover:bg-gray-800"
+            disabled={loading}
+            className="w-full bg-black text-white py-2 rounded hover:bg-gray-800 disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            Login
+            {loading ? "Logging in..." : "Login"}
           </button>
         </form>
 
@@ -125,6 +152,8 @@ function Login() {
             state={{
               from: location.state?.from || "/",
               loginRequired: location.state?.loginRequired,
+              action: location.state?.action,
+              quantity: location.state?.quantity,
             }}
             className="font-semibold text-black hover:underline"
           >
