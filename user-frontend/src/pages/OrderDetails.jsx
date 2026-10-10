@@ -16,23 +16,35 @@ function OrderDetails() {
     useState(false);
 
   useEffect(() => {
-    const fetchOrder = async () => {
-      try {
-        const data = await getOrderById(id);
+  const fetchOrder = async () => {
+    try {
+      setLoading(true);
+      setMessage("");
+      setOrder(null);
 
-        setOrder(data.order);
-      } catch (error) {
-        setMessage(
-          error.response?.data?.message ||
-            "Failed to fetch order"
-        );
-      } finally {
-        setLoading(false);
+      const data = await getOrderById(id);
+
+      if (!data.order) {
+        setMessage("Order not found");
+        return;
       }
-    };
 
-    fetchOrder();
-  }, [id]);
+      setOrder(data.order);
+    } catch (error) {
+      console.error("Failed to fetch order:", error);
+
+      setMessage(
+        error.response?.data?.message ||
+          "Failed to fetch order"
+      );
+      setOrder(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  fetchOrder();
+}, [id]);
 
   const handleCancelOrder = async () => {
     try {
@@ -54,25 +66,133 @@ function OrderDetails() {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <p className="text-gray-600">
-          Loading order...
-        </p>
+ if (loading) {
+  return (
+    <div className="max-w-6xl mx-auto p-4 sm:p-6">
+      {/* Page Header */}
+      <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-6" />
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        {/* Main Content */}
+        <div className="lg:col-span-2 space-y-6">
+          {/* Order Info */}
+          <div className="bg-white rounded-xl shadow p-4 sm:p-6 animate-pulse">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
+              <div>
+                <div className="h-6 bg-gray-200 rounded w-48 mb-2" />
+                <div className="h-4 bg-gray-200 rounded w-32" />
+              </div>
+
+              <div className="h-8 bg-gray-200 rounded-full w-28" />
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
+              <div>
+                <div className="h-3 bg-gray-200 rounded w-24 mb-2" />
+                <div className="h-5 bg-gray-200 rounded w-32" />
+              </div>
+
+              <div>
+                <div className="h-3 bg-gray-200 rounded w-28 mb-2" />
+                <div className="h-5 bg-gray-200 rounded w-24" />
+              </div>
+
+              <div>
+                <div className="h-3 bg-gray-200 rounded w-24 mb-2" />
+                <div className="h-5 bg-gray-200 rounded w-36" />
+              </div>
+
+              <div>
+                <div className="h-3 bg-gray-200 rounded w-20 mb-2" />
+                <div className="h-5 bg-gray-200 rounded w-32" />
+              </div>
+            </div>
+          </div>
+
+          {/* Products */}
+          <div className="bg-white rounded-xl shadow p-4 sm:p-6 animate-pulse">
+            <div className="h-6 bg-gray-200 rounded w-28 mb-5" />
+
+            <div className="space-y-4">
+              {[1, 2, 3].map((item) => (
+                <div
+                  key={item}
+                  className="flex items-center gap-4 border-b pb-4 last:border-b-0"
+                >
+                  <div className="w-16 h-16 bg-gray-200 rounded-md shrink-0" />
+
+                  <div className="flex-1">
+                    <div className="h-5 bg-gray-200 rounded w-3/4 mb-2" />
+                    <div className="h-4 bg-gray-200 rounded w-1/3" />
+                  </div>
+
+                  <div className="h-5 bg-gray-200 rounded w-20" />
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+
+        {/* Sidebar */}
+        <div className="space-y-6">
+          {/* Shipping Address */}
+          <div className="bg-white rounded-xl shadow p-4 sm:p-6 animate-pulse">
+            <div className="h-6 bg-gray-200 rounded w-40 mb-5" />
+
+            <div className="space-y-3">
+              <div className="h-5 bg-gray-200 rounded w-3/4" />
+              <div className="h-4 bg-gray-200 rounded w-full" />
+              <div className="h-4 bg-gray-200 rounded w-2/3" />
+              <div className="h-4 bg-gray-200 rounded w-1/2" />
+              <div className="h-4 bg-gray-200 rounded w-3/4" />
+            </div>
+          </div>
+
+          {/* Order Summary */}
+          <div className="bg-white rounded-xl shadow p-4 sm:p-6 animate-pulse">
+            <div className="h-6 bg-gray-200 rounded w-32 mb-5" />
+
+            <div className="space-y-4">
+              <div className="flex justify-between">
+                <div className="h-4 bg-gray-200 rounded w-20" />
+                <div className="h-4 bg-gray-200 rounded w-24" />
+              </div>
+
+              <div className="flex justify-between">
+                <div className="h-4 bg-gray-200 rounded w-24" />
+                <div className="h-4 bg-gray-200 rounded w-20" />
+              </div>
+
+              <div className="border-t pt-4 flex justify-between">
+                <div className="h-6 bg-gray-200 rounded w-20" />
+                <div className="h-6 bg-gray-200 rounded w-28" />
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   if (!order) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <p className="text-red-600">
+  return (
+    <div className="min-h-screen flex items-center justify-center px-4">
+      <div className="text-center">
+        <p className="text-red-600 text-lg font-medium">
           {message || "Order not found"}
         </p>
+
+        <Link
+          to="/orders"
+          className="inline-block mt-5 bg-blue-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition"
+        >
+          Back to My Orders
+        </Link>
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   return (
     <div className="min-h-screen bg-gray-100 px-4 py-6 sm:px-6 sm:py-10">
