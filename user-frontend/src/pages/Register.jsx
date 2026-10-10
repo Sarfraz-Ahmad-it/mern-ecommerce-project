@@ -16,18 +16,24 @@ function Register() {
   });
 
   const [message, setMessage] = useState("");
+  const [loading, setLoading] = useState(false);
 
   const handleChange = (e) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
+
+    setMessage("");
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     try {
+      setLoading(true);
+      setMessage("");
+
       const response = await axios.post(
         "http://localhost:5001/api/auth/register",
         formData
@@ -35,20 +41,40 @@ function Register() {
 
       // Login the newly registered user immediately
       login(
-      response.data.token,
-      response.data.user
-     );
+        response.data.token,
+        response.data.user
+      );
 
-      // Return to the page the user originally came from
-      const redirectTo =
-        location.state?.from || "/";
+      // Get redirect information
+      const from = location.state?.from || "/";
+      const action = location.state?.action;
 
-      navigate(redirectTo);
+      // Buy Now flow
+      if (action === "buyNow") {
+          const productId = from.split("/").pop();
+
+          navigate("/checkout", {
+            state: {
+              source: "buyNow",
+              items: [
+                {
+                  productId,
+                  quantity: location.state?.quantity || 1,
+                },
+              ],
+            },
+          });
+        } else {
+        // Normal flow
+        navigate(from);
+      }
     } catch (error) {
       setMessage(
         error.response?.data?.message ||
           "Registration failed"
       );
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -138,9 +164,10 @@ function Register() {
           {/* Register Button */}
           <button
             type="submit"
-            className="w-full bg-black text-white py-3 px-4 rounded-lg text-sm sm:text-base font-medium hover:bg-gray-800 active:scale-[0.99] transition"
+            disabled={loading}
+            className="w-full bg-black text-white py-3 px-4 rounded-lg text-sm sm:text-base font-medium hover:bg-gray-800 active:scale-[0.99] transition disabled:bg-gray-400 disabled:cursor-not-allowed"
           >
-            Register
+            {loading ? "Registering..." : "Register"}
           </button>
         </form>
 
@@ -158,6 +185,9 @@ function Register() {
             to="/login"
             state={{
               from: location.state?.from || "/",
+              loginRequired: location.state?.loginRequired,
+              action: location.state?.action,
+              quantity: location.state?.quantity,
             }}
             className="font-semibold text-black hover:underline"
           >
