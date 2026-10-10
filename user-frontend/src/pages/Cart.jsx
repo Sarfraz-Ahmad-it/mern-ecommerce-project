@@ -191,14 +191,103 @@ function Cart() {
   };
 
   if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center px-4">
-        <p className="text-gray-600">
-          Loading cart...
-        </p>
+  return (
+    <div className="min-h-screen bg-gray-100 px-4 py-6 sm:px-6 sm:py-10">
+      <div className="max-w-6xl mx-auto animate-pulse">
+
+        {/* Header Skeleton */}
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 mb-6">
+          <div>
+            <div className="h-8 bg-gray-200 rounded w-32" />
+            <div className="h-4 bg-gray-200 rounded w-48 mt-2" />
+          </div>
+
+          <div className="h-10 bg-gray-200 rounded-lg w-full sm:w-28" />
+        </div>
+
+        {/* Select All Skeleton */}
+        <div className="bg-white rounded-xl shadow-sm p-4 mb-4">
+          <div className="flex items-center gap-3">
+            <div className="w-5 h-5 bg-gray-200 rounded" />
+            <div className="h-5 bg-gray-200 rounded w-24" />
+            <div className="h-4 bg-gray-200 rounded w-20" />
+          </div>
+        </div>
+
+        {/* Main Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+
+          {/* Cart Items */}
+          <div className="lg:col-span-2 space-y-4">
+            {[1, 2, 3].map((item) => (
+              <div
+                key={item}
+                className="bg-white rounded-xl shadow-sm p-4 sm:p-5"
+              >
+                <div className="flex flex-col sm:flex-row gap-4">
+
+                  {/* Image Skeleton */}
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 bg-gray-200 rounded mt-1 shrink-0" />
+
+                    <div className="w-full sm:w-28 h-48 sm:h-28 bg-gray-200 rounded-lg shrink-0" />
+                  </div>
+
+                  {/* Product Info Skeleton */}
+                  <div className="flex-1 space-y-3">
+                    <div className="h-6 bg-gray-200 rounded w-3/4" />
+
+                    <div className="h-5 bg-gray-200 rounded w-24" />
+
+                    {/* Quantity Skeleton */}
+                    <div className="flex items-center gap-3 mt-4">
+                      <div className="w-9 h-9 bg-gray-200 rounded-lg" />
+                      <div className="w-8 h-5 bg-gray-200 rounded" />
+                      <div className="w-9 h-9 bg-gray-200 rounded-lg" />
+                    </div>
+
+                    <div className="h-5 bg-gray-200 rounded w-32" />
+
+                    <div className="h-4 bg-gray-200 rounded w-16" />
+                  </div>
+
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* Desktop Summary Skeleton */}
+          <div className="hidden lg:block">
+            <div className="bg-white rounded-xl shadow-sm p-5 sm:p-6">
+              <div className="h-6 bg-gray-200 rounded w-32 mb-6" />
+
+              <div className="space-y-4">
+                <div className="flex justify-between">
+                  <div className="h-4 bg-gray-200 rounded w-28" />
+                  <div className="h-4 bg-gray-200 rounded w-8" />
+                </div>
+
+                <div className="flex justify-between">
+                  <div className="h-4 bg-gray-200 rounded w-20" />
+                  <div className="h-4 bg-gray-200 rounded w-8" />
+                </div>
+
+                <div className="border-t pt-4 flex justify-between">
+                  <div className="h-5 bg-gray-200 rounded w-16" />
+                  <div className="h-7 bg-gray-200 rounded w-24" />
+                </div>
+
+                <div className="h-12 bg-gray-200 rounded-lg mt-5" />
+              </div>
+            </div>
+          </div>
+
+        </div>
+
       </div>
-    );
-  }
+    </div>
+  );
+}
 
   if (message && !cart) {
     return (
