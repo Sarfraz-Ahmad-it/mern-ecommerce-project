@@ -11,6 +11,9 @@ function ProductDetails() {
   const navigate = useNavigate();
 
   const [product, setProduct] = useState(null);
+  const [productLoading, setProductLoading] = useState(true);
+  const [productError, setProductError] = useState("");
+
   const [quantity, setQuantity] = useState(1);
   const [message, setMessage] = useState("");
   const [toast, setToast] = useState("");
@@ -20,13 +23,24 @@ function ProductDetails() {
   useEffect(() => {
     const fetchProduct = async () => {
       try {
+        setProductLoading(true);
+        setProductError("");
+
         const data = await getProductById(id);
-        setProduct(data.product);
+
+        setProduct(data.product || null);
       } catch (error) {
         console.error(
           "Failed to fetch product:",
           error
         );
+
+        setProductError(
+          error.response?.data?.message ||
+            "Failed to load product. Please try again."
+        );
+      } finally {
+        setProductLoading(false);
       }
     };
 
@@ -66,15 +80,15 @@ function ProductDetails() {
     const token = localStorage.getItem("token");
 
     if (!token) {
-      navigate("/login", {
-        state: {
-          from: `/products/${id}`,
-          loginRequired: true,
-        },
-      });
+        navigate("/login", {
+          state: {
+            from: `/products/${id}`,
+            loginRequired: true,
+          },
+        });
 
-      return;
-    }
+        return;
+      }
 
     if (inCart) {
       navigate("/cart");
@@ -92,10 +106,8 @@ function ProductDetails() {
 
       setInCart(true);
 
-      // Show toast
       setToast("Item added to cart");
 
-      // Hide toast after 2.5 seconds
       setTimeout(() => {
         setToast("");
       }, 2500);
@@ -109,40 +121,114 @@ function ProductDetails() {
     }
   };
 
-  // Buy Now
-  const handleBuyNow = () => {
-    const token = localStorage.getItem("token");
+ const handleBuyNow = () => {
+  const token = localStorage.getItem("token");
 
-    if (!token) {
-      navigate("/login", {
-        state: {
-          from: `/products/${id}`,
-          loginRequired: true,
-        },
-      });
-
-      return;
-    }
-
-    navigate("/checkout", {
+  if (!token) {
+    navigate("/login", {
       state: {
-        source: "buyNow",
-        items: [
-          {
-            productId: product._id,
-            quantity,
-          },
-        ],
+        from: `/products/${id}`,
+        loginRequired: true,
+        action: "buyNow",
+        quantity,
       },
     });
-  };
+
+    return;
+  }
+
+  navigate("/checkout", {
+    state: {
+      source: "buyNow",
+      items: [
+        {
+          productId: product._id,
+          quantity,
+        },
+      ],
+    },
+  });
+};
+
+  if (productLoading) {
+    return (
+      <div className="max-w-6xl mx-auto px-4 py-6 sm:px-6 sm:py-10">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-10 items-center animate-pulse">
+
+          {/* Image Skeleton */}
+          <div className="w-full h-64 sm:h-96 md:h-[450px] bg-gray-200 rounded-lg" />
+
+          {/* Product Information Skeleton */}
+          <div className="space-y-5">
+
+            <div className="h-10 bg-gray-200 rounded w-3/4" />
+
+            <div className="space-y-2">
+              <div className="h-5 bg-gray-200 rounded w-full" />
+              <div className="h-5 bg-gray-200 rounded w-5/6" />
+              <div className="h-5 bg-gray-200 rounded w-2/3" />
+            </div>
+
+            <div className="h-9 bg-gray-200 rounded w-1/3" />
+
+            <div className="h-5 bg-gray-200 rounded w-1/2" />
+            <div className="h-5 bg-gray-200 rounded w-1/3" />
+
+            <div className="space-y-3">
+              <div className="h-5 bg-gray-200 rounded w-20" />
+
+              <div className="flex gap-3">
+                <div className="w-10 h-10 bg-gray-200 rounded-lg" />
+                <div className="w-10 h-10 bg-gray-200 rounded-lg" />
+                <div className="w-10 h-10 bg-gray-200 rounded-lg" />
+              </div>
+            </div>
+
+            <div className="flex flex-col sm:flex-row gap-3">
+              <div className="h-12 bg-gray-200 rounded-lg w-full sm:w-40" />
+              <div className="h-12 bg-gray-200 rounded-lg w-full sm:w-32" />
+            </div>
+
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (productError) {
+    return (
+      <div className="min-h-screen flex items-center justify-center px-4">
+        <div className="text-center max-w-md">
+          <p className="text-red-600 text-lg font-medium">
+            {productError}
+          </p>
+
+          <button
+            onClick={() => navigate("/")}
+            className="mt-5 bg-blue-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition"
+          >
+            Back to Products
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   if (!product) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
-        <p className="text-gray-600">
-          Loading...
-        </p>
+        <div className="text-center">
+          <p className="text-gray-600 text-lg">
+            Product not found.
+          </p>
+
+          <button
+            onClick={() => navigate("/")}
+            className="mt-5 bg-blue-600 text-white px-5 py-2.5 rounded-lg font-medium hover:bg-blue-700 transition"
+          >
+            Back to Products
+          </button>
+        </div>
       </div>
     );
   }
